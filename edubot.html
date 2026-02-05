@@ -1,0 +1,1540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduBot AI - Your KS3 Learning Companion</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #8b5cf6;
+            --accent: #06b6d4;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg-dark: #0f0f23;
+            --bg-card: #1a1a2e;
+            --bg-input: #16213e;
+            --text-primary: #ffffff;
+            --text-secondary: #a0aec0;
+            --border: rgba(99, 102, 241, 0.3);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            min-height: 100vh;
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 40%, rgba(6, 182, 212, 0.1) 0%, transparent 40%);
+            animation: bgFloat 20s ease-in-out infinite;
+        }
+
+        @keyframes bgFloat {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(30px, -30px) rotate(5deg); }
+            66% { transform: translate(-20px, 20px) rotate(-5deg); }
+        }
+
+        .floating-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.5;
+            animation: orbFloat 15s ease-in-out infinite;
+        }
+
+        .orb-1 {
+            width: 300px;
+            height: 300px;
+            background: var(--primary);
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .orb-2 {
+            width: 200px;
+            height: 200px;
+            background: var(--secondary);
+            top: 60%;
+            right: 10%;
+            animation-delay: -5s;
+        }
+
+        .orb-3 {
+            width: 250px;
+            height: 250px;
+            background: var(--accent);
+            bottom: 10%;
+            left: 30%;
+            animation-delay: -10s;
+        }
+
+        @keyframes orbFloat {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(50px, -50px); }
+        }
+
+        /* Main Container */
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 30px 20px;
+            position: relative;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .logo-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            box-shadow: 0 10px 40px rgba(99, 102, 241, 0.4);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .logo-text {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tagline {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-top: 5px;
+        }
+
+        .safety-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            color: var(--success);
+            margin-top: 15px;
+        }
+
+        .safety-badge::before {
+            content: '🛡️';
+        }
+
+        /* Subject Selector */
+        .subject-selector {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .subject-btn {
+            padding: 12px 24px;
+            border: 2px solid transparent;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-card);
+            color: var(--text-secondary);
+        }
+
+        .subject-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .subject-btn.active {
+            border-color: var(--primary);
+            color: var(--text-primary);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
+        }
+
+        .subject-btn.maths { --subject-color: #f59e0b; }
+        .subject-btn.maths.active { border-color: #f59e0b; background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(245, 158, 11, 0.1)); }
+        
+        .subject-btn.english { --subject-color: #ec4899; }
+        .subject-btn.english.active { border-color: #ec4899; background: linear-gradient(135deg, rgba(236, 72, 153, 0.2), rgba(236, 72, 153, 0.1)); }
+        
+        .subject-btn.biology { --subject-color: #22c55e; }
+        .subject-btn.biology.active { border-color: #22c55e; background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(34, 197, 94, 0.1)); }
+        
+        .subject-btn.chemistry { --subject-color: #a855f7; }
+        .subject-btn.chemistry.active { border-color: #a855f7; background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(168, 85, 247, 0.1)); }
+        
+        .subject-btn.physics { --subject-color: #3b82f6; }
+        .subject-btn.physics.active { border-color: #3b82f6; background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(59, 130, 246, 0.1)); }
+        
+        .subject-btn.wellbeing { --subject-color: #06b6d4; }
+        .subject-btn.wellbeing.active { border-color: #06b6d4; background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(6, 182, 212, 0.1)); }
+        
+        .subject-btn.about { --subject-color: #64748b; }
+        .subject-btn.about:hover { border-color: #64748b; background: linear-gradient(135deg, rgba(100, 116, 139, 0.2), rgba(100, 116, 139, 0.1)); }
+
+        /* Main Chat Area */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
+            flex: 1;
+        }
+
+        @media (max-width: 900px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            .sidebar {
+                order: -1;
+            }
+        }
+
+        .chat-container {
+            background: var(--bg-card);
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: statusPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes statusPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .chat-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .chat-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            min-height: 400px;
+            max-height: 500px;
+        }
+
+        .message {
+            display: flex;
+            gap: 12px;
+            animation: messageSlide 0.3s ease-out;
+        }
+
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .message.bot .message-avatar {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+
+        .message.user .message-avatar {
+            background: linear-gradient(135deg, var(--accent), #0891b2);
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 14px 18px;
+            border-radius: 18px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .message.bot .message-content {
+            background: var(--bg-input);
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-bottom-right-radius: 4px;
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 14px 18px;
+            background: var(--bg-input);
+            border-radius: 18px;
+            width: fit-content;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--text-secondary);
+            border-radius: 50%;
+            animation: typingBounce 1.4s ease-in-out infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-8px); }
+        }
+
+        .chat-input-container {
+            padding: 20px;
+            border-top: 1px solid var(--border);
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: var(--bg-input);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 14px 18px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: inherit;
+            resize: none;
+            transition: border-color 0.3s ease;
+            min-height: 50px;
+            max-height: 120px;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .chat-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .send-btn {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            transition: all 0.3s ease;
+            color: white;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .sidebar-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-title {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .quick-prompts {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .quick-prompt {
+            background: var(--bg-input);
+            border: 1px solid transparent;
+            padding: 12px 14px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .quick-prompt:hover {
+            background: rgba(99, 102, 241, 0.1);
+            border-color: var(--primary);
+            color: var(--text-primary);
+            transform: translateX(5px);
+        }
+
+        .safety-info {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .safety-list {
+            list-style: none;
+            margin-top: 10px;
+        }
+
+        .safety-list li {
+            padding: 8px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .safety-list li::before {
+            content: '✓';
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        .responsible-ai-notice {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05));
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+
+        .responsible-ai-notice h4 {
+            color: var(--warning);
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .responsible-ai-notice p {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* Welcome Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .modal-overlay.hidden {
+            display: none;
+        }
+
+        .modal {
+            background: var(--bg-card);
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 30px;
+            text-align: center;
+            animation: modalSlide 0.3s ease-out;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            transform: scale(1.1);
+        }
+
+        @keyframes modalSlide {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .modal-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin: 0 auto 20px;
+        }
+
+        .modal h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+
+        .modal p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .agreement-list {
+            text-align: left;
+            background: var(--bg-input);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .agreement-list h4 {
+            margin-bottom: 12px;
+            color: var(--primary);
+        }
+
+        .agreement-list ul {
+            list-style: none;
+        }
+
+        .agreement-list li {
+            padding: 8px 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .agreement-list li::before {
+            content: '📌';
+        }
+
+        .modal-btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            padding: 14px 40px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+        }
+
+        /* Scrollbar Styles */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-input);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        /* Math rendering */
+        .math-block {
+            background: var(--bg-input);
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation">
+        <div class="floating-orb orb-1"></div>
+        <div class="floating-orb orb-2"></div>
+        <div class="floating-orb orb-3"></div>
+    </div>
+
+    <!-- About Modal -->
+    <div class="modal-overlay hidden" id="aboutModal" onclick="closeAboutOnOverlay(event)">
+        <div class="modal">
+            <button class="modal-close" onclick="closeAbout()" title="Close">✕</button>
+            <div class="modal-icon">🤖</div>
+            <h2>About EduBot AI</h2>
+            <p>Your safe and friendly learning companion for KS3 students.</p>
+            
+            <div class="agreement-list">
+                <h4>🛡️ Our Promise to You:</h4>
+                <ul>
+                    <li>All conversations are age-appropriate and educational</li>
+                    <li>We never ask for personal information</li>
+                    <li>We encourage learning, not just giving answers</li>
+                    <li>If something feels wrong, tell a trusted adult</li>
+                </ul>
+            </div>
+
+            <div class="agreement-list">
+                <h4>📚 How to Use EduBot Responsibly:</h4>
+                <ul>
+                    <li>Use AI as a learning helper, not to cheat</li>
+                    <li>Always try to understand, not just copy</li>
+                    <li>Check AI answers with your teacher</li>
+                    <li>Be kind and respectful in your questions</li>
+                </ul>
+            </div>
+
+            <div class="agreement-list" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.1)); border: 1px solid rgba(99, 102, 241, 0.3);">
+                <h4 style="color: #8b5cf6;">✨ Made By</h4>
+                <p style="font-size: 1.1rem; font-weight: 600; color: #fff; text-align: center; padding: 10px 0;">Viaan Bhola</p>
+            </div>
+
+            <button class="modal-btn" onclick="closeAbout()">Got it! 👍</button>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <header class="header">
+            <div class="logo-container">
+                <div class="logo-icon">🤖</div>
+                <h1 class="logo-text">EduBot AI</h1>
+            </div>
+            <p class="tagline">Your Smart Learning Companion for KS3</p>
+            <div class="safety-badge">Safe & Age-Appropriate Learning</div>
+        </header>
+
+        <div class="subject-selector">
+            <button class="subject-btn maths active" onclick="selectSubject('maths', this)">
+                <span>📐</span> Maths
+            </button>
+            <button class="subject-btn english" onclick="selectSubject('english', this)">
+                <span>📖</span> English
+            </button>
+            <button class="subject-btn biology" onclick="selectSubject('biology', this)">
+                <span>🧬</span> Biology
+            </button>
+            <button class="subject-btn chemistry" onclick="selectSubject('chemistry', this)">
+                <span>⚗️</span> Chemistry
+            </button>
+            <button class="subject-btn physics" onclick="selectSubject('physics', this)">
+                <span>⚡</span> Physics
+            </button>
+            <button class="subject-btn wellbeing" onclick="selectSubject('wellbeing', this)">
+                <span>💚</span> Wellbeing
+            </button>
+            <button class="subject-btn about" onclick="showAbout()">
+                <span>ℹ️</span> About
+            </button>
+        </div>
+
+        <div class="main-content">
+            <div class="chat-container">
+                <div class="chat-header">
+                    <div class="status-indicator"></div>
+                    <div>
+                        <div class="chat-title">EduBot is ready to help!</div>
+                        <div class="chat-subtitle">Currently helping with: <span id="currentSubject">Maths</span></div>
+                    </div>
+                </div>
+
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message bot">
+                        <div class="message-avatar">🤖</div>
+                        <div class="message-content">
+                            Hey there! 👋 I'm EduBot, your ultimate KS3 learning companion! I'm loaded with knowledge in:
+                            <br><br>
+                            📐 <strong>Maths</strong> • 📖 <strong>English</strong> • 🧬 <strong>Biology</strong> • ⚗️ <strong>Chemistry</strong> • ⚡ <strong>Physics</strong> • 💚 <strong>Wellbeing</strong>
+                            <br><br>
+                            Just pick a subject above and ask me anything - from DNA and genetics to forces and electromagnets, I've got you covered! 🚀
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chat-input-container">
+                    <div class="input-wrapper">
+                        <textarea 
+                            class="chat-input" 
+                            id="userInput" 
+                            placeholder="Ask me anything about your studies..."
+                            rows="1"
+                            onkeydown="handleKeyPress(event)"
+                        ></textarea>
+                        <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                            ➤
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="sidebar-card">
+                    <h3 class="card-title">💡 Quick Questions</h3>
+                    <div class="quick-prompts" id="quickPrompts">
+                        <button class="quick-prompt" onclick="usePrompt('Can you explain how to solve equations with one variable?')">
+                            How do I solve equations?
+                        </button>
+                        <button class="quick-prompt" onclick="usePrompt('What are the key features of a persuasive text?')">
+                            Help with persuasive writing
+                        </button>
+                        <button class="quick-prompt" onclick="usePrompt('Explain the water cycle in simple terms')">
+                            Explain the water cycle
+                        </button>
+                        <button class="quick-prompt" onclick="usePrompt('I\'m feeling stressed about exams. Any tips?')">
+                            Exam stress tips
+                        </button>
+                    </div>
+                </div>
+
+                <div class="sidebar-card">
+                    <h3 class="card-title">🛡️ Staying Safe Online</h3>
+                    <div class="safety-info">
+                        <ul class="safety-list">
+                            <li>Never share personal details</li>
+                            <li>AI can make mistakes - verify important info</li>
+                            <li>Tell a trusted adult if worried</li>
+                            <li>Use AI to learn, not replace learning</li>
+                        </ul>
+
+                        <div class="responsible-ai-notice">
+                            <h4>⚠️ AI Learning Notice</h4>
+                            <p>I'm an AI assistant. While I try my best, I can sometimes be wrong. Always double-check important information with your teachers or trusted sources!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>🎓 EduBot AI - Designed for KS3 Learners | <a href="#" onclick="showSafetyInfo()">Safety Info</a> | Always learn responsibly!</p>
+        </footer>
+    </div>
+
+    <script>
+        // State Management
+        let currentSubject = 'maths';
+        let isTyping = false;
+        let conversationHistory = [];
+        let lastTopic = '';
+
+        // Subject-specific data
+        const subjectData = {
+            maths: {
+                name: 'Maths',
+                icon: '📐',
+                prompts: [
+                    'Explain Pythagoras theorem',
+                    'Help with ratio and proportion',
+                    'How do bearings work?',
+                    'Speed distance time formula'
+                ]
+            },
+            english: {
+                name: 'English',
+                icon: '📖',
+                prompts: [
+                    'Persuasive writing AFOREST',
+                    'Language techniques list',
+                    'How to analyse a quote',
+                    'Descriptive writing tips'
+                ]
+            },
+            biology: {
+                name: 'Biology',
+                icon: '🧬',
+                prompts: [
+                    'How does photosynthesis work?',
+                    'Explain the circulatory system',
+                    'What is respiration?',
+                    'How do cells work?'
+                ]
+            },
+            chemistry: {
+                name: 'Chemistry',
+                icon: '⚗️',
+                prompts: [
+                    'Explain atomic structure',
+                    'What is the reactivity series?',
+                    'Acids and alkalis explained',
+                    'States of matter'
+                ]
+            },
+            physics: {
+                name: 'Physics',
+                icon: '⚡',
+                prompts: [
+                    'Forces and Newton\'s laws',
+                    'How do waves work?',
+                    'Explain the EM spectrum',
+                    'Electricity and circuits'
+                ]
+            },
+            wellbeing: {
+                name: 'Wellbeing',
+                icon: '💚',
+                prompts: [
+                    'Help with exam stress',
+                    'How to stay focused',
+                    'Building confidence tips',
+                    'Managing friendships'
+                ]
+            }
+        };
+
+        // Comprehensive responses database
+        const responses = {
+            maths: {
+                'equation': `<strong>🔥 EQUATIONS MASTERCLASS</strong><br><br>Equations are like puzzles - your mission is to find the mystery number!<br><br><strong>⚡ The Golden Rule:</strong> Whatever you do to one side, you MUST do to the other!<br><br><strong>Example: Solve x + 7 = 15</strong><br>┌─────────────────────────┐<br>│ x + 7 = 15              │<br>│ x + 7 - 7 = 15 - 7      │<br>│ x = 8 ✓                 │<br>└─────────────────────────┘<br><br><strong>🎮 Level Up - Two-Step Equations:</strong><br>Solve 3x + 4 = 19<br>• Step 1: Subtract 4 → 3x = 15<br>• Step 2: Divide by 3 → x = 5<br><br>💡 <strong>Pro Tip:</strong> Always check your answer by plugging it back in!`,
+                'fraction': `<strong>🍕 FRACTIONS DECODED</strong><br><br>Think of fractions as slices of pizza!<br><br><strong>The Anatomy:</strong><br>┌───────────┐<br>│  3  ← Numerator (slices you have)    │<br>│ ───               │<br>│  4  ← Denominator (total slices)     │<br>└───────────┘<br><br><strong>⚡ Adding Fractions:</strong><br>Same denominator? Just add the tops!<br>• 1/5 + 2/5 = 3/5<br><br>Different denominators? Find LCD first!<br>• 1/2 + 1/3 = 3/6 + 2/6 = 5/6<br><br><strong>🔥 Multiplying:</strong> Multiply tops, multiply bottoms<br>• 2/3 × 4/5 = 8/15<br><br><strong>🔄 Dividing:</strong> Flip the second and multiply!<br>• 2/3 ÷ 4/5 = 2/3 × 5/4 = 10/12 = 5/6`,
+                'percentage': `<strong>💯 PERCENTAGE POWER-UPS</strong><br><br>Percent = "Per Hundred" - it's that simple!<br><br><strong>⚡ Quick Mental Maths Tricks:</strong><br>┌────────────────────────────┐<br>│ 50% = ÷ 2                  │<br>│ 25% = ÷ 4                  │<br>│ 10% = ÷ 10                 │<br>│ 1%  = ÷ 100                │<br>└────────────────────────────┘<br><br><strong>🔥 Find Any Percentage:</strong><br>Example: 35% of 80<br>• 10% of 80 = 8<br>• 30% = 8 × 3 = 24<br>• 5% = 8 ÷ 2 = 4<br>• 35% = 24 + 4 = 28 ✓<br><br><strong>💡 Percentage Change Formula:</strong><br>(Change ÷ Original) × 100`,
+                'pythagoras': `<strong>📐 PYTHAGORAS' THEOREM - COMPLETE GUIDE</strong><br><br>The most famous formula in geometry - works for ANY right-angled triangle!<br><br><strong>⚡ THE FORMULA:</strong><br>┌─────────────────────────────────────┐<br>│     a² + b² = c²                    │<br>│                                     │<br>│  c = hypotenuse (longest side,      │<br>│      opposite the right angle)      │<br>│  a and b = the two shorter sides    │<br>└─────────────────────────────────────┘<br><br><strong>🔥 FINDING THE HYPOTENUSE:</strong><br>If a = 6cm and b = 8cm, find c:<br>• c² = 6² + 8²<br>• c² = 36 + 64 = 100<br>• c = √100 = 10cm ✓<br><br><strong>🔥 FINDING A SHORTER SIDE:</strong><br>If c = 13cm and a = 5cm, find b:<br>• a² + b² = c²<br>• 5² + b² = 13²<br>• 25 + b² = 169<br>• b² = 169 - 25 = 144<br>• b = √144 = 12cm ✓<br><br><strong>💡 Common Pythagorean Triples:</strong><br>• 3, 4, 5 (and multiples: 6,8,10 etc)<br>• 5, 12, 13<br>• 8, 15, 17<br>• 7, 24, 25`,
+                'pythagoras2d': `<strong>📐 PYTHAGORAS IN 2D - REAL WORLD PROBLEMS</strong><br><br>Use Pythagoras to find distances in 2D shapes!<br><br><strong>⚡ DIAGONAL OF A RECTANGLE:</strong><br>A rectangle is 8m by 6m. Find the diagonal.<br>┌─────────────────────────────────────┐<br>│ The diagonal creates two right-    │<br>│ angled triangles!                   │<br>│                                     │<br>│ d² = 8² + 6²                        │<br>│ d² = 64 + 36 = 100                  │<br>│ d = √100 = 10m ✓                    │<br>└─────────────────────────────────────┘<br><br><strong>🔥 DISTANCE BETWEEN TWO POINTS:</strong><br>Find distance from A(1,2) to B(4,6):<br>• Horizontal distance: 4 - 1 = 3<br>• Vertical distance: 6 - 2 = 4<br>• Distance² = 3² + 4² = 9 + 16 = 25<br>• Distance = √25 = 5 units ✓<br><br><strong>💡 ISOCELES TRIANGLE HEIGHT:</strong><br>An isoceles triangle has base 10cm, equal sides 13cm. Find height:<br>• Height splits base in half: 5cm each side<br>• h² + 5² = 13²<br>• h² + 25 = 169<br>• h² = 144, so h = 12cm ✓`,
+                'ratio': `<strong>⚖️ RATIO AND PROPORTION - COMPLETE GUIDE</strong><br><br>Ratios compare quantities using the same units!<br><br><strong>⚡ WRITING RATIOS:</strong><br>┌─────────────────────────────────────┐<br>│ 3 red balls and 5 blue balls        │<br>│ Ratio = 3:5 (red to blue)           │<br>│ OR 5:3 (blue to red) - order matters│<br>└─────────────────────────────────────┘<br><br><strong>🔥 SIMPLIFYING RATIOS:</strong><br>Like simplifying fractions - divide by the HCF!<br>• 12:18 → both ÷ 6 → 2:3 ✓<br>• 20:35 → both ÷ 5 → 4:7 ✓<br>• 45:27 → both ÷ 9 → 5:3 ✓<br><br><strong>💡 WITH DIFFERENT UNITS:</strong><br>Convert to same units first!<br>• 2kg : 500g = 2000g : 500g = 4:1<br>• 1.5m : 30cm = 150cm : 30cm = 5:1<br><br><strong>⚠️ Three-part ratios:</strong><br>• 2:3:5 means 2 parts, 3 parts, 5 parts<br>• Total parts = 2 + 3 + 5 = 10 parts`,
+                'sharing': `<strong>🍰 SHARING IN A GIVEN RATIO</strong><br><br>Split amounts fairly according to a ratio!<br><br><strong>⚡ THE METHOD:</strong><br>┌─────────────────────────────────────┐<br>│ 1. Add up all the parts             │<br>│ 2. Divide total by number of parts  │<br>│ 3. Multiply each ratio number       │<br>└─────────────────────────────────────┘<br><br><strong>🔥 EXAMPLE 1:</strong><br>Share £120 in the ratio 3:5<br>• Total parts = 3 + 5 = 8<br>• One part = £120 ÷ 8 = £15<br>• First share = 3 × £15 = £45 ✓<br>• Second share = 5 × £15 = £75 ✓<br>• Check: £45 + £75 = £120 ✓<br><br><strong>🔥 EXAMPLE 2 (Three-way split):</strong><br>Share 180 sweets in ratio 2:3:4<br>• Total parts = 2 + 3 + 4 = 9<br>• One part = 180 ÷ 9 = 20<br>• Shares: 40, 60, 80 sweets ✓<br><br><strong>💡 WORKING BACKWARDS:</strong><br>Ali and Ben share money 2:3. Ben gets £45. Find Ali's share.<br>• 3 parts = £45, so 1 part = £15<br>• Ali gets 2 parts = 2 × £15 = £30 ✓`,
+                'direct': `<strong>📈 DIRECT PROPORTION</strong><br><br>When one quantity increases, the other increases at the same rate!<br><br><strong>⚡ THE KEY IDEA:</strong><br>┌─────────────────────────────────────┐<br>│ If you double one, you double both! │<br>│ The ratio between them stays SAME   │<br>└─────────────────────────────────────┘<br><br><strong>🔥 EXAMPLE 1:</strong><br>5 books cost £30. How much do 8 books cost?<br>• Method 1 (Unitary): Find cost of 1 book first<br>  - 1 book = £30 ÷ 5 = £6<br>  - 8 books = 8 × £6 = £48 ✓<br><br><strong>🔥 EXAMPLE 2:</strong><br>3 workers paint a fence in 12 hours. How long for 1 worker?(Careful - this is actually INVERSE proportion!)<br><br><strong>🔥 EXAMPLE 3:</strong><br>A recipe for 4 people uses 200g flour. How much for 10 people?<br>• For 1 person: 200 ÷ 4 = 50g<br>• For 10 people: 50 × 10 = 500g ✓<br><br><strong>💡 SPOTTING DIRECT PROPORTION:</strong><br>• More items = more cost<br>• More people = more food needed<br>• Bigger area = more paint needed`,
+                'inverse': `<strong>📉 INVERSE PROPORTION</strong><br><br>When one quantity increases, the other DECREASES!<br><br><strong>⚡ THE KEY IDEA:</strong><br>┌─────────────────────────────────────┐<br>│ If you double one, you HALVE the    │<br>│ other! Their PRODUCT stays constant │<br>└─────────────────────────────────────┘<br><br><strong>🔥 EXAMPLE 1:</strong><br>4 workers build a wall in 6 days. How long for 3 workers?<br>• Total work = 4 × 6 = 24 worker-days<br>• With 3 workers: 24 ÷ 3 = 8 days ✓<br>• (Fewer workers = takes LONGER!)<br><br><strong>🔥 EXAMPLE 2:</strong><br>A car at 60mph takes 2 hours. At 40mph?<br>• Distance = 60 × 2 = 120 miles<br>• Time at 40mph = 120 ÷ 40 = 3 hours ✓<br>• (Slower speed = takes LONGER!)<br><br><strong>🔥 EXAMPLE 3:</strong><br>12 taps fill a pool in 4 hours. How long with 8 taps?<br>• Total = 12 × 4 = 48 tap-hours<br>• With 8 taps: 48 ÷ 8 = 6 hours ✓<br><br><strong>💡 SPOTTING INVERSE PROPORTION:</strong><br>• More workers = less time<br>• Faster speed = less time<br>• Bigger gear = fewer rotations`,
+                'currency': `<strong>💱 CURRENCY CONVERSION</strong><br><br>Change money between different currencies!<br><br><strong>⚡ KEY CONCEPT:</strong><br>┌─────────────────────────────────────┐<br>│ Exchange rate tells you how much    │<br>│ foreign currency = £1               │<br>│ Example: £1 = €1.20                 │<br>└─────────────────────────────────────┘<br><br><strong>🔥 POUNDS TO FOREIGN:</strong><br>Convert £50 to euros (rate: £1 = €1.20)<br>• £50 × 1.20 = €60 ✓<br>• MULTIPLY by the rate!<br><br><strong>🔥 FOREIGN TO POUNDS:</strong><br>Convert $180 to pounds (rate: £1 = $1.50)<br>• $180 ÷ 1.50 = £120 ✓<br>• DIVIDE by the rate!<br><br><strong>💡 BEST DEAL PROBLEMS:</strong><br>UK price: £45. US price: $52 (rate £1 = $1.30)<br>• Convert US to UK: $52 ÷ 1.30 = £40<br>• US price (£40) < UK price (£45)<br>• USA is cheaper! ✓<br><br><strong>⚠️ Remember:</strong><br>• Going FROM pounds → MULTIPLY<br>• Coming TO pounds → DIVIDE`,
+                'speed': `<strong>🏎️ SPEED, DISTANCE AND TIME</strong><br><br>The ultimate formula triangle!<br><br><strong>⚡ THE MAGIC FORMULA:</strong><br>┌─────────────────────────────────────┐<br>│         DISTANCE                    │<br>│     ──────────────────              │<br>│     SPEED  ×  TIME                  │<br>│                                     │<br>│ Speed = Distance ÷ Time             │<br>│ Distance = Speed × Time             │<br>│ Time = Distance ÷ Speed             │<br>└─────────────────────────────────────┘<br><br><strong>🔥 EXAMPLE 1:</strong><br>A car travels 150 miles in 3 hours. Find speed.<br>• Speed = 150 ÷ 3 = 50 mph ✓<br><br><strong>🔥 EXAMPLE 2:</strong><br>A train travels at 80 mph for 2.5 hours. Find distance.<br>• Distance = 80 × 2.5 = 200 miles ✓<br><br><strong>🔥 EXAMPLE 3:</strong><br>How long to travel 180km at 60km/h?<br>• Time = 180 ÷ 60 = 3 hours ✓<br><br><strong>💡 UNIT CONVERSIONS:</strong><br>• km/h to m/s: ÷ 3.6<br>• m/s to km/h: × 3.6<br>• 1 hour = 60 minutes = 3600 seconds`,
+                'rates': `<strong>📊 CALCULATING WITH RATES</strong><br><br>Rates compare quantities with different units!<br><br><strong>⚡ COMMON RATES:</strong><br>┌─────────────────────────────────────┐<br>│ Speed: miles per hour (mph)         │<br>│ Pay: pounds per hour (£/hr)         │<br>│ Fuel: miles per gallon (mpg)        │<br>│ Price: cost per kg (£/kg)           │<br>└─────────────────────────────────────┘<br><br><strong>🔥 EXAMPLE 1 - PAY RATES:</strong><br>Earning £12.50 per hour, work for 7 hours:<br>• Pay = 12.50 × 7 = £87.50 ✓<br><br><strong>🔥 EXAMPLE 2 - FUEL:</strong><br>A car does 45 mpg. How far on 8 gallons?<br>• Distance = 45 × 8 = 360 miles ✓<br><br><strong>🔥 EXAMPLE 3 - BEST VALUE:</strong><br>Shop A: 500g for £3.20<br>Shop B: 750g for £4.50<br>• Shop A: £3.20 ÷ 5 = £0.64 per 100g<br>• Shop B: £4.50 ÷ 7.5 = £0.60 per 100g<br>• Shop B is better value! ✓<br><br><strong>💡 DENSITY:</strong><br>Density = Mass ÷ Volume<br>• Units: g/cm³ or kg/m³`,
+                'angle': `<strong>📐 COMBINING ANGLE FACTS</strong><br><br>Use multiple angle rules together to solve problems!<br><br><strong>⚡ KEY ANGLE FACTS:</strong><br>┌─────────────────────────────────────┐<br>│ • Angles on straight line = 180°    │<br>│ • Angles around a point = 360°      │<br>│ • Angles in a triangle = 180°       │<br>│ • Angles in a quadrilateral = 360°  │<br>│ • Vertically opposite = equal       │<br>│ • Base angles of isoceles = equal   │<br>└─────────────────────────────────────┘<br><br><strong>🔥 MULTI-STEP EXAMPLE:</strong><br>In a triangle, one angle is 50°, another is twice the third.<br>• Let third angle = x<br>• Second angle = 2x<br>• 50 + x + 2x = 180<br>• 50 + 3x = 180<br>• 3x = 130<br>• x = 43.3°, 2x = 86.7° ✓<br><br><strong>💡 EXTERIOR ANGLES:</strong><br>• Exterior angle of triangle = sum of opposite interior angles<br>• Exterior angles of any polygon = 360°`,
+                'parallel': `<strong>📐 ANGLES ON PARALLEL LINES</strong><br><br>When a line crosses parallel lines, special angles form!<br><br><strong>⚡ THE THREE RULES:</strong><br>┌─────────────────────────────────────┐<br>│ ALTERNATE ANGLES (Z-angles)         │<br>│ • On opposite sides of transversal  │<br>│ • Between the parallel lines        │<br>│ • They are EQUAL                    │<br>├─────────────────────────────────────┤<br>│ CORRESPONDING ANGLES (F-angles)     │<br>│ • On same side of transversal       │<br>│ • Same position at each intersection│<br>│ • They are EQUAL                    │<br>├─────────────────────────────────────┤<br>│ CO-INTERIOR ANGLES (C/U-angles)     │<br>│ • On same side of transversal       │<br>│ • Between the parallel lines        │<br>│ • They ADD UP TO 180°               │<br>└─────────────────────────────────────┘<br><br><strong>🔥 EXAMPLE:</strong><br>If one angle is 65°, find alternate angle:<br>• Alternate = 65° (equal) ✓<br>Find co-interior angle:<br>• Co-interior = 180° - 65° = 115° ✓<br><br><strong>💡 Remember:</strong> Alternate and corresponding are EQUAL. Co-interior ADD to 180°!`,
+                'quadrilateral': `<strong>📐 QUADRILATERAL ANGLE PROPERTIES</strong><br><br>Use shape properties to find missing angles!<br><br><strong>⚡ ANGLE SUMS:</strong><br>• Any quadrilateral: angles = 360°<br><br><strong>🔥 SPECIAL QUADRILATERALS:</strong><br>┌─────────────────────────────────────┐<br>│ RECTANGLE: All angles = 90°         │<br>│ SQUARE: All angles = 90°            │<br>│ PARALLELOGRAM: Opposite = equal     │<br>│    Adjacent angles = 180°           │<br>│ RHOMBUS: Like parallelogram         │<br>│ TRAPEZIUM: Co-interior = 180°       │<br>│    (between parallel sides)         │<br>│ KITE: One pair of opposite = equal  │<br>└─────────────────────────────────────┘<br><br><strong>🔥 EXAMPLE 1:</strong><br>A parallelogram has angle 70°. Find others.<br>• Opposite angle = 70°<br>• Adjacent angles = 180° - 70° = 110° ✓<br><br><strong>🔥 EXAMPLE 2:</strong><br>A kite has angles 100°, 100°, 50°. Find the fourth.<br>• 100 + 100 + 50 + x = 360<br>• x = 110° ✓`,
+                'polygon': `<strong>📐 ANGLES IN POLYGONS</strong><br><br>Find angles in any polygon - pentagons, hexagons, and more!<br><br><strong>⚡ INTERIOR ANGLE SUM:</strong><br>┌─────────────────────────────────────┐<br>│ Sum = (n - 2) × 180°                │<br>│ where n = number of sides           │<br>├─────────────────────────────────────┤<br>│ Triangle (3): (3-2)×180 = 180°      │<br>│ Quadrilateral (4): (4-2)×180 = 360° │<br>│ Pentagon (5): (5-2)×180 = 540°      │<br>│ Hexagon (6): (6-2)×180 = 720°       │<br>│ Heptagon (7): (7-2)×180 = 900°      │<br>│ Octagon (8): (8-2)×180 = 1080°      │<br>└─────────────────────────────────────┘<br><br><strong>🔥 REGULAR POLYGONS:</strong><br>Each interior angle = Sum ÷ n<br>• Regular pentagon = 540 ÷ 5 = 108° ✓<br>• Regular hexagon = 720 ÷ 6 = 120° ✓<br><br><strong>💡 EXTERIOR ANGLES:</strong><br>• Exterior angles ALWAYS sum to 360°<br>• Each exterior = 360° ÷ n (for regular)<br>• Regular hexagon exterior = 360 ÷ 6 = 60° ✓`,
+                'bearing': `<strong>🧭 MEASURING AND DRAWING BEARINGS</strong><br><br>Bearings are directions measured from North, clockwise!<br><br><strong>⚡ BEARING RULES:</strong><br>┌─────────────────────────────────────┐<br>│ 1. Always measured FROM North       │<br>│ 2. Always measured CLOCKWISE        │<br>│ 3. Always written as 3 DIGITS       │<br>│    (e.g., 045° not 45°)             │<br>└─────────────────────────────────────┘<br><br><strong>🔥 KEY BEARINGS:</strong><br>• North = 000°<br>• East = 090°<br>• South = 180°<br>• West = 270°<br>• NE = 045°, SE = 135°, SW = 225°, NW = 315°<br><br><strong>💡 DRAWING A BEARING:</strong><br>To draw bearing 125° from point A:<br>1. Draw North line at A<br>2. Measure 125° clockwise from North<br>3. Draw line in that direction<br><br><strong>⚠️ Common Mistake:</strong><br>A bearing of 060° means 60° clockwise from North, NOT 60° from East!`,
+                'bearingcalc': `<strong>🧭 CALCULATING BEARINGS</strong><br><br>Find bearings using angle facts!<br><br><strong>⚡ BACK BEARINGS:</strong><br>┌─────────────────────────────────────┐<br>│ To find return bearing:             │<br>│ • If bearing < 180°: ADD 180°       │<br>│ • If bearing ≥ 180°: SUBTRACT 180°  │<br>└─────────────────────────────────────┘<br><br><strong>🔥 EXAMPLE 1:</strong><br>Bearing from A to B is 070°.<br>Bearing from B to A = 070° + 180° = 250° ✓<br><br><strong>🔥 EXAMPLE 2:</strong><br>Bearing from P to Q is 235°.<br>Bearing from Q to P = 235° - 180° = 055° ✓<br><br><strong>💡 THREE-POINT PROBLEMS:</strong><br>A is due North of B. C is on bearing 120° from B.<br>Find bearing of C from A.<br>• Use angles: North lines are parallel!<br>• Use alternate angles (Z-angles)<br>• Or draw diagram and use angle facts<br><br><strong>⚠️ Always:</strong><br>• Start from the correct point<br>• Draw clear diagrams<br>• Mark North at EVERY point`,
+                'algebra': `<strong>🔮 ALGEBRA ESSENTIALS</strong><br><br>Algebra is the language of patterns and relationships!<br><br><strong>Key Concepts:</strong><br>• <strong>Variables:</strong> Letters representing unknown numbers (x, y, n)<br>• <strong>Expressions:</strong> 3x + 5 (no equals sign)<br>• <strong>Equations:</strong> 3x + 5 = 20 (has equals sign)<br><br><strong>⚡ Simplifying Expressions:</strong><br>• 3x + 5x = 8x ✓<br>• 4y - 2y + 3 = 2y + 3 ✓<br><br><strong>🔥 Expanding Brackets:</strong><br>• 3(x + 4) = 3x + 12<br>• 2(3x - 5) = 6x - 10<br><br>💡 Like terms only combine with like terms!`,
+                'area': `<strong>📏 AREA FORMULAS</strong><br><br><strong>⚡ KEY FORMULAS:</strong><br>┌─────────────────────────────────────┐<br>│ Rectangle: A = length × width       │<br>│ Triangle: A = ½ × base × height     │<br>│ Parallelogram: A = base × height    │<br>│ Trapezium: A = ½(a+b) × height      │<br>│ Circle: A = π × r²                  │<br>└─────────────────────────────────────┘<br><br><strong>🔥 COMPOUND SHAPES:</strong><br>Split into simpler shapes, find each area, then add!<br><br><strong>💡 Remember:</strong><br>• Height is PERPENDICULAR to the base<br>• Units are squared (cm², m²)`
+            },
+            english: {
+                'persuasive': `<strong>🎯 PERSUASIVE WRITING - COMPLETE GUIDE</strong><br><br>Master the art of convincing your reader!<br><br><strong>⚡ AFOREST TECHNIQUE:</strong><br>┌─────────────────────────────────────┐<br>│ A - Alliteration (repeated sounds)  │<br>│ F - Facts and statistics            │<br>│ O - Opinions (especially experts)   │<br>│ R - Rhetorical questions            │<br>│ E - Emotive language                │<br>│ S - Statistics (numbers convince)   │<br>│ T - Triplets (rule of three)        │<br>└─────────────────────────────────────┘<br><br><strong>🔥 POWER OPENINGS:</strong><br>• "Imagine a world where..."<br>• "Picture this..."<br>• "Have you ever wondered..."<br>• "It's time to take a stand..."<br><br><strong>💡 STRUCTURE:</strong><br>1. Hook - grab attention immediately<br>2. State your argument clearly<br>3. Give 3 strong reasons with evidence<br>4. Address counter-arguments<br>5. Call to action - tell them what to do!<br><br><strong>⚡ MODAL VERBS:</strong><br>must, should, could, would, will, might<br>• "We MUST act now!" (strong)<br>• "You SHOULD consider..." (softer)`,
+                'descriptive': `<strong>✨ DESCRIPTIVE WRITING - PAINT WITH WORDS</strong><br><br>Make your reader SEE, HEAR, FEEL your writing!<br><br><strong>⚡ THE FIVE SENSES:</strong><br>┌─────────────────────────────────────┐<br>│ 👁️ SIGHT: colours, shapes, movement │<br>│ 👂 SOUND: onomatopoeia, silence    │<br>│ ✋ TOUCH: texture, temperature      │<br>│ 👃 SMELL: fragrances, odours        │<br>│ 👅 TASTE: flavours, sensations      │<br>└─────────────────────────────────────┘<br><br><strong>🔥 SHOW DON'T TELL:</strong><br>❌ "She was scared."<br>✅ "Her heart hammered against her ribs as icy dread crawled up her spine."<br><br>❌ "The room was cold."<br>✅ "Frost crept across the window panes; each breath hung in the air like a ghost."<br><br><strong>💡 SENTENCE VARIETY:</strong><br>• Short sentences create tension. Stop. Listen. Wait.<br>• Long, flowing sentences with multiple clauses create a sense of calm and peace, washing over the reader like gentle waves.<br>• Start with -ing: "Trembling, she reached for the door."<br>• Start with emotion: "Terrified, the child hid."<br><br><strong>⚡ PATHETIC FALLACY:</strong><br>Use weather to match mood!<br>• Storm = anger, conflict<br>• Sunshine = happiness<br>• Fog = mystery, confusion`,
+                'techniques': `<strong>📝 LANGUAGE TECHNIQUES - COMPLETE TOOLKIT</strong><br><br><strong>⚡ FIGURATIVE LANGUAGE:</strong><br>┌─────────────────────────────────────┐<br>│ SIMILE: Comparison using like/as    │<br>│ "Her eyes sparkled like diamonds"   │<br>├─────────────────────────────────────┤<br>│ METAPHOR: Direct comparison         │<br>│ "Life is a rollercoaster"           │<br>├─────────────────────────────────────┤<br>│ PERSONIFICATION: Human qualities    │<br>│ "The wind whispered secrets"        │<br>├─────────────────────────────────────┤<br>│ HYPERBOLE: Extreme exaggeration     │<br>│ "I've told you a million times!"    │<br>├─────────────────────────────────────┤<br>│ OXYMORON: Contradicting words       │<br>│ "Deafening silence", "Bitter sweet" │<br>├─────────────────────────────────────┤<br>│ JUXTAPOSITION: Contrasting ideas    │<br>│ "Light and dark", "Love and hate"   │<br>└─────────────────────────────────────┘<br><br><strong>🔥 SOUND TECHNIQUES:</strong><br>• Alliteration: "Peter Piper picked..."<br>• Assonance: Same vowel sounds "cold old gold"<br>• Sibilance: Repeated 's' sounds "snake slithered silently"<br>• Onomatopoeia: Words that sound like their meaning "crash, bang, whisper"<br><br><strong>💡 STRUCTURAL:</strong><br>• Anaphora: Repeating start of sentences<br>• Tricolon: Rule of three<br>• Enjambment: Run-on lines (poetry)`,
+                'analysis': `<strong>🔍 ANALYSING TEXTS - PEE/PEEL PARAGRAPHS</strong><br><br>Structure your analysis for top marks!<br><br><strong>⚡ PEEL STRUCTURE:</strong><br>┌─────────────────────────────────────┐<br>│ P - POINT: What are you arguing?    │<br>│ E - EVIDENCE: Quote from the text   │<br>│ E - EXPLAIN: What technique? Effect?│<br>│ L - LINK: Connect to question/theme │<br>└─────────────────────────────────────┘<br><br><strong>🔥 EXAMPLE ANALYSIS:</strong><br>The writer creates fear through imagery. The phrase "shadows crawled like demons across the wall" uses a simile comparing shadows to demons, suggesting evil and supernatural threat. The verb "crawled" implies slow, deliberate menace. This unsettles the reader and builds tension.<br><br><strong>💡 KEY VOCABULARY:</strong><br>• The writer suggests/implies/conveys...<br>• This creates a sense of...<br>• The reader feels/understands...<br>• The connotations of "..." are...<br>• This technique emphasises...<br><br><strong>⚡ ZOOM IN ON:</strong><br>• Individual word choices<br>• Grammar and punctuation<br>• Sentence structure<br>• What's NOT said (implications)`,
+                'poem': `<strong>📝 POETRY ANALYSIS - COMPLETE GUIDE</strong><br><br><strong>⚡ SMILE FRAMEWORK:</strong><br>┌─────────────────────────────────────┐<br>│ S - STRUCTURE: Form, stanzas, lines │<br>│ M - MEANING: What's it about?       │<br>│ I - IMAGERY: Pictures in your mind  │<br>│ L - LANGUAGE: Word choices, sound   │<br>│ E - EFFECT: How does it make you    │<br>│     feel? What does it make you     │<br>│     think?                          │<br>└─────────────────────────────────────┘<br><br><strong>🔥 POETIC DEVICES:</strong><br>• Rhyme scheme: ABAB, AABB, etc.<br>• Enjambment: Lines running on<br>• Caesura: Pause in middle of line<br>• Volta: Turning point in poem<br>• Free verse: No regular pattern<br><br><strong>💡 RHYTHM:</strong><br>• Iambic pentameter: 10 syllables per line (Shakespeare)<br>• Short lines = quick pace, urgency<br>• Long lines = flowing, calm<br><br><strong>⚡ TYPICAL THEMES:</strong><br>Love, death, nature, war, identity, conflict, power, family`,
+                'shakespeare': `<strong>🎭 SHAKESPEARE - UNLOCKING THE LANGUAGE</strong><br><br><strong>⚡ ESSENTIAL TRANSLATIONS:</strong><br>┌─────────────────────────────────────┐<br>│ Thou/Thee = You                     │<br>│ Thy/Thine = Your/Yours              │<br>│ Art = Are                           │<br>│ Dost/Doth = Do/Does                 │<br>│ Hath = Has                          │<br>│ Wherefore = Why (NOT where!)        │<br>│ Ere = Before                        │<br>│ Hence = From here                   │<br>│ Hither = To here                    │<br>│ Anon = Soon                         │<br>│ Methinks = I think                  │<br>│ Prithee = Please                    │<br>│ Forsooth = In truth                 │<br>│ Verily = Truly                      │<br>└─────────────────────────────────────┘<br><br><strong>🔥 TOP TIPS:</strong><br>• Read it OUT LOUD - it's meant to be performed!<br>• Look for the emotion behind the words<br>• Watch for puns - Shakespeare loved them!<br>• Notice when characters speak in prose vs verse<br><br><strong>💡 CONTEXT:</strong><br>• Written 1590s-1610s<br>• Plays performed at the Globe Theatre<br>• All actors were male!`,
+                'grammar': `<strong>✏️ GRAMMAR AND PUNCTUATION</strong><br><br><strong>⚡ PUNCTUATION RULES:</strong><br>┌─────────────────────────────────────┐<br>│ SEMICOLON (;)                       │<br>│ Links two related independent       │<br>│ clauses: "I love reading; it takes  │<br>│ me to other worlds."                │<br>├─────────────────────────────────────┤<br>│ COLON (:)                           │<br>│ Introduces a list, explanation,     │<br>│ or example: "I need: eggs, milk."   │<br>├─────────────────────────────────────┤<br>│ DASH (-)                            │<br>│ Adds emphasis or extra info:        │<br>│ "The answer - believe it or not -   │<br>│ was right in front of us."          │<br>└─────────────────────────────────────┘<br><br><strong>🔥 COMMON ERRORS:</strong><br>• Their/There/They're<br>• Your/You're<br>• Its/It's<br>• Could have (NOT could of!)<br>• Affect (verb) vs Effect (noun)<br><br><strong>💡 SENTENCE TYPES:</strong><br>• Simple: One clause<br>• Compound: Two clauses joined by coordinating conjunction (and, but, or)<br>• Complex: Main clause + subordinate clause`,
+                'narrative': `<strong>📖 NARRATIVE WRITING - TELL A STORY</strong><br><br><strong>⚡ STORY STRUCTURE:</strong><br>┌─────────────────────────────────────┐<br>│ 1. EXPOSITION: Setting, characters  │<br>│ 2. RISING ACTION: Tension builds    │<br>│ 3. CLIMAX: Most exciting point      │<br>│ 4. FALLING ACTION: Consequences     │<br>│ 5. RESOLUTION: Ending               │<br>└─────────────────────────────────────┘<br><br><strong>🔥 POWERFUL OPENINGS:</strong><br>• In medias res: Start in the action!<br>• Dialogue: "Run!" she screamed.<br>• Weather: The storm raged...<br>• Question: Have you ever...?<br><br><strong>💡 CHARACTER DEVELOPMENT:</strong><br>• Show personality through actions<br>• Use dialogue to reveal character<br>• Describe reactions and thoughts<br>• Show change and growth<br><br><strong>⚡ POWERFUL ENDINGS:</strong><br>• Circular: Link back to opening<br>• Cliffhanger: Leave reader wondering<br>• Reflection: Character thinks back<br>• Twist: Unexpected revelation`,
+                'writing': `<strong>✍️ CREATIVE WRITING SECRETS</strong><br><br><strong>⚡ Show, Don't Tell:</strong><br>❌ "She was scared"<br>✅ "Her hands trembled as her heart pounded against her ribs"<br><br><strong>🔥 Sensory Details (5 Senses):</strong><br>• Sight: vivid colours, shapes<br>• Sound: onomatopoeia, silence<br>• Touch: textures, temperature<br>• Smell: fragrances, odours<br>• Taste: flavours, sensations<br><br><strong>💡 Story Structure:</strong><br>• Hook the reader immediately<br>• Build tension gradually<br>• Climax = peak of action<br>• Resolution wraps it up<br><br>🎯 Vary your sentence lengths for rhythm!`,
+                'vocab': `<strong>📚 VOCABULARY FOR HIGH MARKS</strong><br><br><strong>⚡ ALTERNATIVE WORDS:</strong><br>┌─────────────────────────────────────┐<br>│ Said → exclaimed, whispered,        │<br>│   muttered, declared, announced     │<br>│ Good → exceptional, remarkable,     │<br>│   outstanding, superb, admirable    │<br>│ Bad → dreadful, appalling,          │<br>│   atrocious, deplorable             │<br>│ Happy → elated, overjoyed, ecstatic │<br>│ Sad → melancholy, despondent, bleak │<br>│ Big → immense, colossal, vast       │<br>│ Small → minuscule, minute, tiny     │<br>└─────────────────────────────────────┘<br><br><strong>🔥 TRANSITION WORDS:</strong><br>• However, nevertheless, furthermore<br>• Consequently, therefore, thus<br>• Moreover, additionally, similarly<br>• In contrast, conversely, meanwhile<br><br><strong>💡 FORMAL VS INFORMAL:</strong><br>• Formal: One must consider...<br>• Informal: You should think about...`
+            },
+            biology: {
+                'dna': `<strong>🧬 DNA - THE CODE OF LIFE</strong><br><br>DNA is like the ultimate instruction manual for building YOU!<br><br><strong>⚡ What is DNA?</strong><br>┌─────────────────────────────────┐<br>│ D - Deoxyribose                 │<br>│ N - Nucleic                     │<br>│ A - Acid                        │<br>└─────────────────────────────────┘<br><br><strong>🔬 Structure:</strong><br>• Double helix shape (twisted ladder)<br>• Made of nucleotides<br>• 4 bases: A-T and C-G pairs<br><br><strong>🔥 Key Facts:</strong><br>• Found in the nucleus of cells<br>• Contains genes (sections of DNA)<br>• Human DNA has ~3 billion base pairs!<br>• 99.9% identical between all humans<br><br>💡 If unravelled, your DNA would stretch to the Sun and back 600 times!`,
+                'gene': `<strong>🧬 GENES EXPLAINED</strong><br><br>Genes are the instructions for making proteins - the workers of your body!<br><br><strong>⚡ The Hierarchy:</strong><br>┌─────────────────────────────┐<br>│ DNA → Genes → Chromosomes   │<br>│                             │<br>│ Chromosomes live in the     │<br>│ nucleus of every cell       │<br>└─────────────────────────────┘<br><br><strong>🔥 Key Concepts:</strong><br>• Humans have ~20,000 genes<br>• You get 23 chromosomes from each parent<br>• Genes control traits like eye colour<br>• <strong>Alleles:</strong> Different versions of genes<br>• <strong>Dominant:</strong> Shows if you have one copy (BB or Bb)<br>• <strong>Recessive:</strong> Only shows with two copies (bb)<br><br>💡 You share 50% of your DNA with bananas!`,
+                'variation': `<strong>🎭 VARIATION IN LIVING THINGS</strong><br><br>Why we're all unique!<br><br><strong>⚡ Two Types of Variation:</strong><br><br><strong>1. INHERITED VARIATION</strong><br>• Passed from parents through genes<br>• Examples: eye colour, blood type, earlobes<br>• You can't change these!<br><br><strong>2. ENVIRONMENTAL VARIATION</strong><br>• Caused by your surroundings/lifestyle<br>• Examples: scars, muscle size, language<br>• These can change over time!<br><br><strong>🔥 Some traits are BOTH:</strong><br>• Height (genes + nutrition)<br>• Weight (genes + diet + exercise)<br>• Skin colour (genes + sun exposure)<br><br>💡 Even identical twins have fingerprint differences!`,
+                'extinct': `<strong>☠️ EXTINCTION - GONE FOREVER</strong><br><br>When every member of a species dies, it's extinct - no coming back!<br><br><strong>⚡ Causes of Extinction:</strong><br>┌─────────────────────────────────┐<br>│ 🌋 Natural disasters           │<br>│ 🌡️ Climate change              │<br>│ 🦠 Disease                      │<br>│ 🏭 Habitat destruction          │<br>│ 🎯 Hunting/Overfishing         │<br>│ 🐍 Invasive species            │<br>│ 🌿 Competition for resources   │<br>└─────────────────────────────────┘<br><br><strong>🔥 Mass Extinctions:</strong><br>• There have been 5 mass extinctions<br>• Dinosaurs wiped out 66 million years ago<br>• We may be in the 6th right now!<br><br><strong>💡 Endangered Species:</strong> At risk but can be saved with conservation!`,
+                'plant': `<strong>🌱 PLANT GROWTH & REACTIONS</strong><br><br>Plants are more active than you think!<br><br><strong>⚡ How Plants Grow:</strong><br>• <strong>Photosynthesis:</strong> Making food using sunlight<br>• Carbon dioxide + Water → Glucose + Oxygen<br>• Happens in chloroplasts (contain chlorophyll)<br><br><strong>🔥 Plant Hormones (Auxins):</strong><br>• Control growth direction<br>• <strong>Phototropism:</strong> Growing towards light<br>• <strong>Gravitropism:</strong> Roots grow down, shoots grow up<br><br><strong>🌿 What Plants Need:</strong><br>• Light (for photosynthesis)<br>• Water (for reactions + support)<br>• Carbon dioxide (raw material)<br>• Minerals (nitrates for proteins)<br><br>💡 Plants can "communicate" through chemical signals!`,
+                'adaptation': `<strong>🦎 PLANT ADAPTATIONS</strong><br><br>Plants evolved amazing survival tricks!<br><br><strong>⚡ Desert Plant Adaptations:</strong><br>• Thick waxy cuticle (reduces water loss)<br>• Spines instead of leaves (less surface area)<br>• Deep or wide root systems<br>• Store water in stems (cacti)<br><br><strong>🌊 Water Plant Adaptations:</strong><br>• Air spaces for floating<br>• Flexible stems<br>• Stomata on upper leaf surface<br>• No need for strong roots<br><br><strong>🔥 Rainforest Adaptations:</strong><br>• Drip tips on leaves (drain water)<br>• Tall thin trunks to reach light<br>• Buttress roots for support<br>• Large leaves to catch limited light<br><br>💡 Venus flytraps adapted to eat insects for nitrogen!`,
+                'plant product': `<strong>🌿 USEFUL PLANT PRODUCTS</strong><br><br>Plants give us so much!<br><br><strong>⚡ Key Products:</strong><br>┌─────────────────────────────────┐<br>│ 🍞 Food (fruits, vegetables)   │<br>│ 💊 Medicines (aspirin, morphine)│<br>│ 👕 Fibres (cotton, linen)      │<br>│ 🪵 Wood & Paper                │<br>│ ⛽ Biofuels                    │<br>│ 🎨 Dyes & Pigments             │<br>└─────────────────────────────────┘<br><br><strong>🔥 Amazing Examples:</strong><br>• Willow bark → Aspirin<br>• Rubber trees → Tyres & elastic<br>• Aloe vera → Healing gel<br>• Lavender → Calming oils<br><br>💡 About 25% of all medicines come from rainforest plants!`,
+                'photosynthesis': `<strong>🌿 PHOTOSYNTHESIS - MAKING FOOD FROM SUNLIGHT</strong><br><br>The most important chemical reaction on Earth!<br><br><strong>⚡ The Equation:</strong><br>┌─────────────────────────────────────────────────┐<br>│ Carbon Dioxide + Water → Glucose + Oxygen       │<br>│ 6CO₂ + 6H₂O → C₆H₁₂O₆ + 6O₂                   │<br>└─────────────────────────────────────────────────┘<br><br><strong>🔬 Where it Happens:</strong><br>• In CHLOROPLASTS (contain chlorophyll)<br>• Chlorophyll is the green pigment<br>• Mainly in leaves (palisade cells)<br><br><strong>🔥 What's Needed:</strong><br>• <strong>Light</strong> - provides energy<br>• <strong>Carbon dioxide</strong> - enters through stomata<br>• <strong>Water</strong> - absorbed by roots<br>• <strong>Chlorophyll</strong> - absorbs light energy<br><br><strong>💡 Products:</strong><br>• <strong>Glucose</strong> - used for energy, stored as starch<br>• <strong>Oxygen</strong> - released as a waste product<br><br>Without photosynthesis, there'd be no oxygen for us to breathe!`,
+                'glucose': `<strong>🍬 GLUCOSE - THE ENERGY MOLECULE</strong><br><br>Glucose is the sugar that powers all living things!<br><br><strong>⚡ What is Glucose?</strong><br>• A simple sugar (monosaccharide)<br>• Chemical formula: C₆H₁₂O₆<br>• Made by plants during photosynthesis<br>• Main source of energy for cells<br><br><strong>🔥 What Plants Do With Glucose:</strong><br>┌─────────────────────────────────────────┐<br>│ 🔋 RESPIRATION - Release energy        │<br>│ 🌱 GROWTH - Make cellulose for walls   │<br>│ 💪 PROTEINS - Combined with nitrates   │<br>│ 🛢️ STORAGE - Converted to starch      │<br>│ 🍎 FRUITS - Attract animals for seeds  │<br>│ 🌻 OILS - Stored in seeds              │<br>└─────────────────────────────────────────┘<br><br><strong>💡 In Humans:</strong><br>• We get glucose from food (carbohydrates)<br>• Blood carries glucose to cells<br>• Used in respiration to release energy<br>• Excess stored as glycogen in liver/muscles`,
+                'respiration': `<strong>🔥 RESPIRATION - RELEASING ENERGY</strong><br><br>NOT breathing - it's how cells release energy from glucose!<br><br><strong>⚡ Aerobic Respiration (with oxygen):</strong><br>┌─────────────────────────────────────────────────┐<br>│ Glucose + Oxygen → Carbon Dioxide + Water       │<br>│ C₆H₁₂O₆ + 6O₂ → 6CO₂ + 6H₂O + ENERGY           │<br>└─────────────────────────────────────────────────┘<br><br><strong>🔥 Anaerobic Respiration (without oxygen):</strong><br><br><strong>In Animals:</strong><br>Glucose → Lactic Acid + Energy (less)<br>• Causes muscle cramp during exercise<br><br><strong>In Plants/Yeast:</strong><br>Glucose → Ethanol + Carbon Dioxide + Energy<br>• Used in brewing and bread-making!<br><br><strong>💡 Key Points:</strong><br>• Happens in MITOCHONDRIA<br>• Occurs 24/7 in all living cells<br>• Energy used for: movement, growth, warmth, repair<br>• Aerobic releases MORE energy than anaerobic`,
+                'transpiration': `<strong>💧 TRANSPIRATION - WATER LOSS IN PLANTS</strong><br><br>Plants constantly lose water through their leaves!<br><br><strong>⚡ What is Transpiration?</strong><br>• Evaporation of water from stomata (leaf pores)<br>• Pulls water up through the plant<br>• Like drinking through a straw!<br><br><strong>🔥 The Transpiration Stream:</strong><br>┌─────────────────────────────────────────┐<br>│ Roots absorb water from soil            │<br>│         ↓                               │<br>│ Xylem vessels carry water up stem       │<br>│         ↓                               │<br>│ Water evaporates from leaves (stomata)  │<br>└─────────────────────────────────────────┘<br><br><strong>💡 Factors Affecting Transpiration Rate:</strong><br>• <strong>Temperature</strong> - hotter = faster<br>• <strong>Humidity</strong> - drier air = faster<br>• <strong>Wind</strong> - windier = faster<br>• <strong>Light</strong> - more light = stomata open = faster`,
+                'leaf': `<strong>🍃 LEAF STRUCTURE - THE FOOD FACTORY</strong><br><br>Leaves are perfectly designed for photosynthesis!<br><br><strong>⚡ Leaf Adaptations:</strong><br>┌─────────────────────────────────────────┐<br>│ Broad & flat → Large surface area       │<br>│ Thin → Short distance for gases         │<br>│ Veins → Transport water & sugars        │<br>│ Waxy cuticle → Reduces water loss       │<br>│ Stomata underneath → Gas exchange       │<br>└─────────────────────────────────────────┘<br><br><strong>🔬 Inside a Leaf:</strong><br>• <strong>Epidermis</strong> - protective outer layer<br>• <strong>Palisade mesophyll</strong> - packed with chloroplasts<br>• <strong>Spongy mesophyll</strong> - air spaces for gas exchange<br>• <strong>Guard cells</strong> - open and close stomata<br><br><strong>💡 Stomata:</strong><br>• Tiny pores mostly on underside of leaf<br>• Let CO₂ in and O₂ out<br>• Also where water vapour escapes (transpiration)`,
+                'cell': `<strong>🔬 CELLS - BUILDING BLOCKS OF LIFE</strong><br><br>All living things are made of cells!<br><br><strong>⚡ Animal Cell Parts:</strong><br>┌─────────────────────────────────────────┐<br>│ 🟡 Nucleus - Contains DNA               │<br>│ 🔵 Cytoplasm - Where reactions happen   │<br>│ ⭕ Cell membrane - Controls entry       │<br>│ 🔋 Mitochondria - Releases energy       │<br>│ 🏭 Ribosomes - Makes proteins           │<br>└─────────────────────────────────────────┘<br><br><strong>🔥 Plant Cells Have EXTRA:</strong><br>• <strong>Cell wall</strong> - Made of cellulose, gives support<br>• <strong>Chloroplasts</strong> - Contain chlorophyll for photosynthesis<br>• <strong>Vacuole</strong> - Large, contains cell sap, keeps cell rigid<br><br><strong>💡 Specialised Cells:</strong><br>• Red blood cells - carry oxygen<br>• Nerve cells - transmit signals<br>• Sperm cells - have tail for swimming<br>• Root hair cells - absorb water`,
+                'digestion': `<strong>🍽️ THE DIGESTIVE SYSTEM</strong><br><br>Breaking food down into nutrients your body can use!<br><br><strong>⚡ The Journey of Food:</strong><br>┌─────────────────────────────────────────┐<br>│ 👄 MOUTH - Teeth chew, saliva adds     │<br>│    enzymes (amylase breaks down starch)│<br>│         ↓                               │<br>│ 🫘 STOMACH - Acid kills bacteria,      │<br>│    protease breaks down proteins        │<br>│         ↓                               │<br>│ 🌀 SMALL INTESTINE - Most digestion    │<br>│    & absorption happens here            │<br>│         ↓                               │<br>│ 🔄 LARGE INTESTINE - Absorbs water     │<br>│         ↓                               │<br>│ 💩 Waste removed                        │<br>└─────────────────────────────────────────┘<br><br><strong>💡 Key Enzymes:</strong><br>• Amylase (starch → sugars)<br>• Protease (proteins → amino acids)<br>• Lipase (fats → fatty acids + glycerol)`,
+                'circulation': `<strong>❤️ THE CIRCULATORY SYSTEM</strong><br><br>Your body's transport network!<br><br><strong>⚡ Components:</strong><br>┌─────────────────────────────────────────┐<br>│ ❤️ HEART - The pump                     │<br>│ 🔴 BLOOD - The transport fluid          │<br>│ 🩸 BLOOD VESSELS - The tubes            │<br>└─────────────────────────────────────────┘<br><br><strong>🔥 The Heart (Double Pump):</strong><br>• Right side → pumps blood to LUNGS<br>• Left side → pumps blood to BODY<br>• Left side has thicker muscle (pumps further)<br><br><strong>💡 Blood Vessels:</strong><br>• <strong>Arteries</strong> - carry blood AWAY from heart (thick walls)<br>• <strong>Veins</strong> - carry blood TO heart (have valves)<br>• <strong>Capillaries</strong> - tiny, one cell thick for exchange<br><br><strong>🔴 Blood Contains:</strong><br>• Red blood cells (carry oxygen)<br>• White blood cells (fight infection)<br>• Platelets (clotting)<br>• Plasma (liquid, carries nutrients)`,
+                'heart': `<strong>❤️ THE HEART - YOUR BODY'S PUMP</strong><br><br>Beats about 100,000 times per day!<br><br><strong>⚡ Structure:</strong><br>┌─────────────────────────────────────────┐<br>│ 4 chambers:                             │<br>│ • Right atrium (receives from body)     │<br>│ • Right ventricle (pumps to lungs)      │<br>│ • Left atrium (receives from lungs)     │<br>│ • Left ventricle (pumps to body)        │<br>└─────────────────────────────────────────┘<br><br><strong>🔥 The Double Circulation:</strong><br>1. Heart → Lungs → Heart (picks up oxygen)<br>2. Heart → Body → Heart (delivers oxygen)<br><br><strong>💡 Key Features:</strong><br>• Valves prevent backflow of blood<br>• Left ventricle has thickest wall<br>• Made of cardiac muscle (never tires)<br>• Controlled by electrical signals`,
+                'blood': `<strong>🩸 BLOOD - THE RIVER OF LIFE</strong><br><br>Blood does way more than you think!<br><br><strong>⚡ Components of Blood:</strong><br>┌─────────────────────────────────────────┐<br>│ 🔴 RED BLOOD CELLS (45%)                │<br>│ • Contain haemoglobin                   │<br>│ • Carry oxygen from lungs to cells      │<br>│ • No nucleus = more room for haemoglobin│<br>│                                         │<br>│ ⚪ WHITE BLOOD CELLS (<1%)              │<br>│ • Fight infection and disease           │<br>│ • Part of immune system                 │<br>│                                         │<br>│ 🟡 PLATELETS                            │<br>│ • Help blood clot at wounds             │<br>│ • Prevent blood loss                    │<br>│                                         │<br>│ 💛 PLASMA (55%)                         │<br>│ • Liquid part of blood                  │<br>│ • Carries nutrients, hormones, waste    │<br>└─────────────────────────────────────────┘`,
+                'breathing': `<strong>🫁 THE RESPIRATORY SYSTEM</strong><br><br>Getting oxygen in and carbon dioxide out!<br><br><strong>⚡ The Pathway of Air:</strong><br>┌─────────────────────────────────────────┐<br>│ 👃 Nose/Mouth - Air enters              │<br>│         ↓                               │<br>│ 🔽 Trachea (windpipe)                   │<br>│         ↓                               │<br>│ 🌲 Bronchi (two branches)               │<br>│         ↓                               │<br>│ 🌿 Bronchioles (smaller tubes)          │<br>│         ↓                               │<br>│ 🫧 Alveoli (air sacs) - GAS EXCHANGE   │<br>└─────────────────────────────────────────┘<br><br><strong>🔥 How We Breathe:</strong><br>• <strong>Inhale:</strong> Diaphragm contracts, ribs up, lungs expand<br>• <strong>Exhale:</strong> Diaphragm relaxes, ribs down, lungs compress<br><br><strong>💡 Gas Exchange in Alveoli:</strong><br>• Oxygen diffuses INTO blood<br>• Carbon dioxide diffuses OUT of blood`,
+                'nervous': `<strong>🧠 THE NERVOUS SYSTEM</strong><br><br>Your body's communication and control centre!<br><br><strong>⚡ Components:</strong><br>┌─────────────────────────────────────────┐<br>│ 🧠 BRAIN - Control centre               │<br>│ 🦴 SPINAL CORD - Information highway    │<br>│ ⚡ NERVES - Carry electrical signals   │<br>└─────────────────────────────────────────┘<br><br><strong>🔥 Types of Neurones:</strong><br>• <strong>Sensory</strong> - carry info FROM receptors to CNS<br>• <strong>Relay</strong> - connect sensory to motor (in CNS)<br>• <strong>Motor</strong> - carry info FROM CNS to muscles<br><br><strong>💡 Reflex Arc (Automatic Response):</strong><br>Stimulus → Receptor → Sensory neurone → Relay → Motor neurone → Response<br><br>Example: Touch hot pan → Pain receptor → Hand pulls away automatically!`,
+                'enzyme': `<strong>🔬 ENZYMES - BIOLOGICAL CATALYSTS</strong><br><br>Enzymes speed up reactions in living things!<br><br><strong>⚡ Key Facts:</strong><br>┌─────────────────────────────────────────┐<br>│ • Made of protein                       │<br>│ • Speed up reactions without being used │<br>│ • Very specific - lock and key model    │<br>│ • Affected by temperature and pH        │<br>└─────────────────────────────────────────┘<br><br><strong>🔥 Lock and Key Model:</strong><br>• Each enzyme has a specific shape (active site)<br>• Only the right substrate fits<br>• Like a key fitting a lock<br><br><strong>💡 Factors Affecting Enzymes:</strong><br>• <strong>Temperature:</strong> Best at ~37°C. Too hot = denatured<br>• <strong>pH:</strong> Each has optimal pH<br><br><strong>Examples:</strong><br>• Amylase - breaks down starch<br>• Protease - breaks down proteins<br>• Lipase - breaks down fats`,
+                'immune': `<strong>🛡️ THE IMMUNE SYSTEM</strong><br><br>Your body's defence against disease!<br><br><strong>⚡ Types of Defence:</strong><br><br><strong>1st Line - Physical Barriers:</strong><br>• Skin - blocks pathogens<br>• Mucus - traps bacteria<br>• Stomach acid - kills germs<br><br><strong>2nd Line - White Blood Cells:</strong><br>┌─────────────────────────────────────────┐<br>│ 🦠 Phagocytes - ENGULF pathogens        │<br>│ 🎯 Lymphocytes - Make ANTIBODIES        │<br>└─────────────────────────────────────────┘<br><br><strong>🔥 How Antibodies Work:</strong><br>• Recognise antigens (markers on pathogens)<br>• Lock onto them and destroy them<br>• Memory cells remember for next time = IMMUNITY<br><br><strong>💡 Vaccination:</strong><br>• Introduces dead/weakened pathogen<br>• Body makes antibodies without getting ill`,
+                'reproduction': `<strong>🌸 REPRODUCTION</strong><br><br>How living things make more of themselves!<br><br><strong>⚡ Two Types:</strong><br><br><strong>SEXUAL REPRODUCTION:</strong><br>• Involves two parents<br>• Gametes (sex cells) join: sperm + egg<br>• Offspring are genetically different<br>• Creates variation in species<br><br><strong>ASEXUAL REPRODUCTION:</strong><br>• Only one parent needed<br>• Offspring are clones (genetically identical)<br>• Faster but no variation<br>• Examples: bacteria dividing, strawberry runners<br><br><strong>🔥 In Flowering Plants:</strong><br>• Pollen (male) lands on stigma<br>• Pollen tube grows down to ovule<br>• Fertilisation occurs → Seed develops<br><br><strong>💡 In Humans:</strong><br>• Sperm fertilises egg<br>• Develops into embryo, then fetus`
+            },
+            chemistry: {
+                'atom': `<strong>⚛️ ATOMS - BUILDING BLOCKS OF MATTER</strong><br><br>Everything is made of atoms - they're incredibly tiny!<br><br><strong>⚡ The Structure of an Atom:</strong><br>┌─────────────────────────────────────────┐<br>│ NUCLEUS (centre):                       │<br>│ • PROTONS (+) positive charge           │<br>│ • NEUTRONS (0) no charge                │<br>│                                         │<br>│ SHELLS (orbits around nucleus):         │<br>│ • ELECTRONS (-) negative charge         │<br>└─────────────────────────────────────────┘<br><br><strong>🔥 Key Facts:</strong><br>• Atoms are neutral (protons = electrons)<br>• Proton number = atomic number<br>• Mass number = protons + neutrons<br>• Electrons fill shells: 2, 8, 8...<br><br><strong>💡 How Small?</strong><br>• About 100 million atoms across 1cm!<br>• Nucleus is 100,000x smaller than the atom`,
+                'element': `<strong>🔬 ELEMENTS - PURE SUBSTANCES</strong><br><br>An element contains only ONE type of atom!<br><br><strong>⚡ Key Facts:</strong><br>┌─────────────────────────────────────────┐<br>│ • About 118 elements discovered         │<br>│ • Each has a unique symbol (O, Fe, Na)  │<br>│ • Cannot be broken down further         │<br>│ • Arranged in the periodic table        │<br>└─────────────────────────────────────────┘<br><br><strong>🔥 Common Elements:</strong><br>• Hydrogen (H) - lightest element<br>• Oxygen (O) - needed for respiration<br>• Carbon (C) - basis of all life<br>• Iron (Fe) - strongest common metal<br>• Gold (Au) - precious, unreactive<br><br><strong>💡 Names to Know:</strong><br>• Sodium = Na (from Natrium)<br>• Potassium = K (from Kalium)<br>• Iron = Fe (from Ferrum)<br>• Lead = Pb (from Plumbum)`,
+                'compound': `<strong>🔗 COMPOUNDS - ATOMS JOINED TOGETHER</strong><br><br>A compound is two or more elements chemically bonded!<br><br><strong>⚡ Compound vs Mixture:</strong><br>┌─────────────────────────────────────────┐<br>│ COMPOUNDS:                              │<br>│ • Fixed ratio of elements               │<br>│ • Chemical bonds hold atoms together    │<br>│ • New properties (different from parts) │<br>│ • Needs chemical reaction to separate   │<br>├─────────────────────────────────────────┤<br>│ MIXTURES:                               │<br>│ • Any ratio of substances               │<br>│ • No chemical bonds                     │<br>│ • Keep original properties              │<br>│ • Can separate physically               │<br>└─────────────────────────────────────────┘<br><br><strong>🔥 Examples:</strong><br>• Water (H₂O) = hydrogen + oxygen<br>• Carbon dioxide (CO₂) = carbon + oxygen<br>• Salt (NaCl) = sodium + chlorine<br>• Methane (CH₄) = carbon + hydrogen`,
+                'periodictable': `<strong>📊 THE PERIODIC TABLE</strong><br><br>A map of ALL the elements, organised by their properties!<br><br><strong>⚡ How It's Organised:</strong><br>┌─────────────────────────────────────────┐<br>│ ROWS = PERIODS (7 total)                │<br>│ • Period number = number of shells      │<br>│                                         │<br>│ COLUMNS = GROUPS (18 total)             │<br>│ • Group number = electrons in outer     │<br>│   shell (for main groups)               │<br>│ • Same group = similar properties!      │<br>└─────────────────────────────────────────┘<br><br><strong>🔥 Key Groups:</strong><br>• Group 1: Alkali metals (very reactive)<br>• Group 7: Halogens (reactive non-metals)<br>• Group 0/8: Noble gases (unreactive)<br>• Transition metals: In the middle<br><br><strong>💡 Trends:</strong><br>• Reactivity of metals DECREASES across a period<br>• Reactivity of metals INCREASES down a group`,
+                'metal': `<strong>🪙 METALS - SHINY AND STRONG</strong><br><br>About 75% of elements are metals!<br><br><strong>⚡ Properties of Metals:</strong><br>┌─────────────────────────────────────────┐<br>│ ✓ Shiny (lustrous) when polished        │<br>│ ✓ Good conductors of heat & electricity │<br>│ ✓ Malleable (can be hammered)           │<br>│ ✓ Ductile (can be drawn into wires)     │<br>│ ✓ High melting/boiling points           │<br>│ ✓ Sonorous (make a ringing sound)       │<br>│ ✓ High density (usually)                │<br>└─────────────────────────────────────────┘<br><br><strong>🔥 Exceptions:</strong><br>• Mercury - liquid at room temperature<br>• Sodium - soft, low melting point<br>• Potassium - floats on water!<br><br><strong>💡 Uses:</strong><br>• Copper - electrical wires<br>• Aluminium - aircraft, drink cans<br>• Iron/Steel - construction, tools`,
+                'nonmetal': `<strong>💨 NON-METALS</strong><br><br>Opposite properties to metals!<br><br><strong>⚡ Properties of Non-Metals:</strong><br>┌─────────────────────────────────────────┐<br>│ ✗ Dull (not shiny)                      │<br>│ ✗ Poor conductors (insulators)          │<br>│ ✗ Brittle if solid (shatter)            │<br>│ ✗ Low melting/boiling points            │<br>│ ✗ Low density                           │<br>│ ✓ Many are gases at room temperature    │<br>└─────────────────────────────────────────┘<br><br><strong>🔥 Important Non-Metals:</strong><br>• Carbon - basis of all organic chemistry<br>• Oxygen - essential for respiration<br>• Nitrogen - 78% of atmosphere<br>• Sulfur - used in acids, matches<br>• Chlorine - used to purify water<br><br><strong>💡 Exception:</strong><br>Graphite (carbon) conducts electricity!`,
+                'acid': `<strong>🧪 ACIDS AND ALKALIS</strong><br><br>Acids are sour, alkalis are soapy - but don't taste them!<br><br><strong>⚡ The pH Scale:</strong><br>┌─────────────────────────────────────────┐<br>│ 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14│<br>│ ←─────ACIDS─────→ │ ←────ALKALIS────→│<br>│ Strong    Weak  NEUTRAL  Weak    Strong│<br>└─────────────────────────────────────────┘<br><br><strong>🔥 Common Acids:</strong><br>• Hydrochloric acid (HCl) - stomach acid<br>• Sulfuric acid (H₂SO₄) - car batteries<br>• Citric acid - lemons, oranges<br>• Ethanoic acid - vinegar<br><br><strong>💡 Common Alkalis:</strong><br>• Sodium hydroxide (NaOH) - drain cleaner<br>• Calcium hydroxide - lime water<br>• Ammonia - cleaning products<br><br><strong>⚡ Indicators:</strong><br>• Litmus: Red in acid, Blue in alkali<br>• Universal indicator: Rainbow of colours`,
+                'neutralisation': `<strong>⚖️ NEUTRALISATION REACTIONS</strong><br><br>Acid + Alkali → Salt + Water<br><br><strong>⚡ The Equation:</strong><br>┌─────────────────────────────────────────┐<br>│ ACID + BASE → SALT + WATER              │<br>│                                         │<br>│ Example:                                │<br>│ HCl + NaOH → NaCl + H₂O                 │<br>│ (hydrochloric (sodium  (salt) (water)   │<br>│  acid)        hydroxide)                │<br>└─────────────────────────────────────────┘<br><br><strong>🔥 Other Neutralisations:</strong><br>• Acid + Metal → Salt + Hydrogen<br>• Acid + Carbonate → Salt + Water + CO₂<br><br><strong>💡 Real-World Uses:</strong><br>• Indigestion tablets (alkali) neutralise stomach acid<br>• Farmers add lime (alkali) to acidic soil<br>• Toothpaste (alkali) neutralises mouth acids<br>• Bee stings (acid) - treat with alkali`,
+                'reaction': `<strong>🔥 CHEMICAL REACTIONS</strong><br><br>Atoms rearrange to form new substances!<br><br><strong>⚡ Signs of a Chemical Reaction:</strong><br>┌─────────────────────────────────────────┐<br>│ 🎨 Colour change                        │<br>│ 🫧 Gas bubbles produced                 │<br>│ 🌡️ Temperature change                  │<br>│ 💡 Light given off                      │<br>│ 🧪 Precipitate forms (solid appears)    │<br>│ 💨 Smell released                       │<br>└─────────────────────────────────────────┘<br><br><strong>🔥 Types of Reactions:</strong><br>• Combustion (burning with oxygen)<br>• Oxidation (gaining oxygen)<br>• Thermal decomposition (breaking down with heat)<br>• Neutralisation (acid + base)<br>• Displacement (reactive pushes out less reactive)<br><br><strong>💡 Key Principle:</strong><br>Mass is conserved - atoms aren't created or destroyed, just rearranged!`,
+                'combustion': `<strong>🔥 COMBUSTION - BURNING</strong><br><br>A reaction between a fuel and oxygen, releasing energy!<br><br><strong>⚡ The Equation:</strong><br>┌─────────────────────────────────────────┐<br>│ FUEL + OXYGEN → CARBON DIOXIDE + WATER  │<br>│         (+ENERGY)                       │<br>└─────────────────────────────────────────┘<br><br><strong>🔥 Complete vs Incomplete:</strong><br><br><strong>COMPLETE COMBUSTION:</strong><br>• Plenty of oxygen<br>• Produces: CO₂ and H₂O<br>• Clean blue flame<br><br><strong>INCOMPLETE COMBUSTION:</strong><br>• Limited oxygen<br>• Produces: Carbon monoxide (CO) - TOXIC!<br>• Also produces soot (carbon)<br>• Yellow/orange smoky flame<br><br><strong>💡 Fire Triangle:</strong><br>Fire needs: FUEL + OXYGEN + HEAT<br>Remove any one to put out fire!`,
+                'oxidation': `<strong>🌬️ OXIDATION AND REDUCTION</strong><br><br>Gaining or losing oxygen!<br><br><strong>⚡ Key Definitions:</strong><br>┌─────────────────────────────────────────┐<br>│ OXIDATION = GAINING oxygen              │<br>│ Example: Iron + Oxygen → Iron Oxide     │<br>│ (Rusting)                               │<br>├─────────────────────────────────────────┤<br>│ REDUCTION = LOSING oxygen               │<br>│ Example: Iron Oxide + Carbon → Iron     │<br>│ (Extracting iron)                       │<br>└─────────────────────────────────────────┘<br><br><strong>🔥 Memory Trick: OIL RIG</strong><br>• Oxidation Is Loss (of electrons)<br>• Reduction Is Gain (of electrons)<br><br><strong>💡 Rusting:</strong><br>• Iron + Oxygen + Water → Hydrated iron oxide<br>• Prevented by: painting, oiling, galvanising<br>• Stainless steel contains chromium to resist rust`,
+                'statesofmatter': `<strong>🧊💧💨 STATES OF MATTER</strong><br><br>Solid, Liquid, Gas - and how they change!<br><br><strong>⚡ Particle Arrangement:</strong><br>┌─────────────────────────────────────────┐<br>│ SOLID:                                  │<br>│ • Particles tightly packed, fixed       │<br>│ • Vibrate but can't move around         │<br>│ • Fixed shape and volume                │<br>├─────────────────────────────────────────┤<br>│ LIQUID:                                 │<br>│ • Particles close but can move          │<br>│ • Flow and take container shape         │<br>│ • Fixed volume, no fixed shape          │<br>├─────────────────────────────────────────┤<br>│ GAS:                                    │<br>│ • Particles far apart, move fast        │<br>│ • Fill any container                    │<br>│ • No fixed shape or volume              │<br>└─────────────────────────────────────────┘<br><br><strong>🔥 State Changes:</strong><br>• Melting: Solid → Liquid (add heat)<br>• Boiling/Evaporation: Liquid → Gas (add heat)<br>• Condensation: Gas → Liquid (remove heat)<br>• Freezing: Liquid → Solid (remove heat)<br>• Sublimation: Solid → Gas directly`,
+                'diffusion': `<strong>💨 DIFFUSION</strong><br><br>Particles spreading from high to low concentration!<br><br><strong>⚡ What is Diffusion?</strong><br>┌─────────────────────────────────────────┐<br>│ The movement of particles from an area  │<br>│ of HIGH concentration to an area of     │<br>│ LOW concentration                       │<br>└─────────────────────────────────────────┘<br><br><strong>🔥 Examples:</strong><br>• Perfume spreading across a room<br>• Tea diffusing from a teabag<br>• Oxygen diffusing into blood in lungs<br>• Smell of cooking spreading<br><br><strong>💡 Factors Affecting Speed:</strong><br>• Temperature - higher = faster diffusion<br>• Mass of particles - lighter = faster<br>• Concentration difference - bigger = faster<br><br>Gases diffuse faster than liquids!`,
+                'separation': `<strong>🔬 SEPARATION TECHNIQUES</strong><br><br>How to separate mixtures!<br><br><strong>⚡ Methods:</strong><br>┌─────────────────────────────────────────┐<br>│ FILTRATION:                             │<br>│ • Separates insoluble solid from liquid │<br>│ • Example: Sand from water              │<br>├─────────────────────────────────────────┤<br>│ EVAPORATION:                            │<br>│ • Gets dissolved solid from solution    │<br>│ • Example: Salt from salt water         │<br>├─────────────────────────────────────────┤<br>│ DISTILLATION:                           │<br>│ • Separates liquids with different      │<br>│   boiling points                        │<br>│ • Example: Pure water from salt water   │<br>├─────────────────────────────────────────┤<br>│ CHROMATOGRAPHY:                         │<br>│ • Separates dissolved substances        │<br>│ • Example: Ink colours                  │<br>└─────────────────────────────────────────┘<br><br><strong>💡 Also:</strong><br>• Magnetic separation (iron from sand)<br>• Fractional distillation (crude oil)`,
+                'reactivity': `<strong>⚡ REACTIVITY SERIES</strong><br><br>Some metals are more reactive than others!<br><br><strong>🔥 THE REACTIVITY SERIES:</strong><br>┌─────────────────────────────────────────┐<br>│ Most Reactive ⬆️                        │<br>│ Potassium (K)   - VIOLENT with water    │<br>│ Sodium (Na)     - VIOLENT with water    │<br>│ Lithium (Li)    - Vigorous with water   │<br>│ Calcium (Ca)    - Fizzes with water     │<br>│ Magnesium (Mg)  - Reacts with steam     │<br>│ Aluminium (Al)  - Reacts with steam     │<br>│ Zinc (Zn)       - Reacts with steam     │<br>│ Iron (Fe)       - Slow with steam       │<br>│ Copper (Cu)     - No reaction           │<br>│ Silver (Ag)     - No reaction           │<br>│ Gold (Au)       - No reaction           │<br>│ Least Reactive ⬇️                       │<br>└─────────────────────────────────────────┘<br><br><strong>💡 Memory Trick:</strong><br>"Please Stop Letting Careless Monkeys Argue Zealously In Cages, Silly Gold"`,
+                'displacement': `<strong>🔄 DISPLACEMENT REACTIONS</strong><br><br>The more reactive metal kicks out the less reactive one!<br><br><strong>⚡ The Rule:</strong><br>┌─────────────────────────────────────────┐<br>│ A MORE reactive metal will DISPLACE     │<br>│ a LESS reactive metal from its compound │<br>└─────────────────────────────────────────┘<br><br><strong>🔥 Example 1:</strong><br>Magnesium + Copper Sulfate → Magnesium Sulfate + Copper<br>• Mg is MORE reactive than Cu ✓<br>• Mg takes Cu's place<br><br><strong>🔥 Example 2:</strong><br>Zinc + Iron Sulfate → Zinc Sulfate + Iron<br>• Zn is MORE reactive than Fe ✓<br><br><strong>❌ Won't Work:</strong><br>Copper + Zinc Sulfate → NO REACTION<br>• Cu is LESS reactive than Zn<br><br><strong>💡 Thermite Reaction:</strong><br>Aluminium + Iron Oxide → Aluminium Oxide + Iron<br>• So hot it's used to weld railway tracks!`,
+                'ceramics': `<strong>🏺 CERAMICS</strong><br><br>From ancient pottery to space shuttles!<br><br><strong>⚡ What Are Ceramics?</strong><br>• Made from clay heated to high temperatures<br>• Non-metal, inorganic materials<br><br><strong>🔥 Properties:</strong><br>┌─────────────────────────────────────────┐<br>│ ✓ Extremely hard                        │<br>│ ✓ Heat resistant (refractory)          │<br>│ ✓ Electrical insulators                │<br>│ ✓ Chemical resistant                   │<br>│ ✗ Brittle (can shatter)                │<br>└─────────────────────────────────────────┘<br><br><strong>💡 Examples:</strong><br>• Bricks, tiles, pottery<br>• Space shuttle heat shields<br>• Artificial teeth and bones`,
+                'polymer': `<strong>🔗 POLYMERS - LONG CHAIN MOLECULES</strong><br><br>Small molecules join to make giant chains!<br><br><strong>⚡ Key Vocabulary:</strong><br>┌─────────────────────────────────────────┐<br>│ MONOMER: Small molecule (building block)│<br>│ POLYMER: Long chain of monomers         │<br>│ POLYMERISATION: Making polymers         │<br>└─────────────────────────────────────────┘<br><br><strong>🔥 Natural Polymers:</strong><br>• DNA, proteins, starch, cellulose<br>• Rubber, silk, wool<br><br><strong>💡 Synthetic Polymers (Plastics):</strong><br>• Polyethene (poly bags, bottles)<br>• PVC (pipes, window frames)<br>• Polystyrene (packaging)<br>• Nylon (ropes, clothing)<br><br><strong>⚠️ Environmental Issues:</strong><br>• Most plastics aren't biodegradable<br>• Take hundreds of years to decompose<br>• Pollute oceans and harm wildlife`,
+                'composite': `<strong>🛡️ COMPOSITE MATERIALS</strong><br><br>Combine materials for super-properties!<br><br><strong>⚡ What Makes a Composite:</strong><br>• Two or more different materials combined<br>• Each keeps its own properties<br>• Together they're stronger!<br><br><strong>🔥 Examples:</strong><br>┌─────────────────────────────────────────┐<br>│ 🏗️ Concrete = cement + gravel + sand   │<br>│ ✈️ Fibreglass = glass fibres + plastic │<br>│ 🏎️ Carbon fibre = carbon + resin       │<br>│ 🪵 MDF = wood fibres + glue            │<br>│ 🛞 Reinforced tyres = rubber + steel   │<br>└─────────────────────────────────────────┘<br><br><strong>💡 Why Use Composites?</strong><br>• Stronger than individual parts<br>• Lighter weight<br>• Custom properties`,
+                'energy': `<strong>🔥 ENERGY IN REACTIONS</strong><br><br>Chemical reactions always involve energy changes!<br><br><strong>⚡ Two Types:</strong><br><br><strong>EXOTHERMIC (releases heat):</strong><br>┌─────────────────────────────────────────┐<br>│ 🔥 Combustion (burning)                 │<br>│ 🔥 Respiration                          │<br>│ 🔥 Neutralisation                       │<br>│ 🔥 Hand warmers                         │<br>│ Temperature goes UP!                    │<br>│ Energy goes OUT to surroundings         │<br>└─────────────────────────────────────────┘<br><br><strong>ENDOTHERMIC (absorbs heat):</strong><br>┌─────────────────────────────────────────┐<br>│ ❄️ Photosynthesis                       │<br>│ ❄️ Thermal decomposition                │<br>│ ❄️ Instant cold packs                   │<br>│ Temperature goes DOWN!                  │<br>│ Energy comes IN from surroundings       │<br>└─────────────────────────────────────────┘<br><br><strong>💡 Energy is never created or destroyed!</strong>`,
+                'wordequation': `<strong>📝 WORD & SYMBOL EQUATIONS</strong><br><br>Writing chemical reactions!<br><br><strong>⚡ Word Equation:</strong><br>┌─────────────────────────────────────────┐<br>│ REACTANTS → PRODUCTS                    │<br>│                                         │<br>│ Magnesium + Oxygen → Magnesium Oxide    │<br>│ (what you start with) → (what you get)  │<br>└─────────────────────────────────────────┘<br><br><strong>🔥 Symbol Equation:</strong><br>2Mg + O₂ → 2MgO<br><br><strong>💡 Balancing Equations:</strong><br>• Same number of each atom on both sides<br>• NEVER change the small (subscript) numbers<br>• Only change the big numbers in front<br><br><strong>⚡ State Symbols:</strong><br>• (s) = solid<br>• (l) = liquid<br>• (g) = gas<br>• (aq) = aqueous (dissolved in water)`
+            },
+            physics: {
+                'force': `<strong>💪 FORCES - PUSHES AND PULLS</strong><br><br>Forces make things move, stop, or change direction!<br><br><strong>⚡ Types of Forces:</strong><br>┌─────────────────────────────────────────┐<br>│ ⬇️ GRAVITY - pulls everything down      │<br>│ ⬆️ NORMAL FORCE - surface pushes back   │<br>│ ➡️ THRUST - pushes forward              │<br>│ ⬅️ FRICTION - opposes motion            │<br>│ 🌊 AIR RESISTANCE - opposes in air      │<br>│ ⬆️ UPTHRUST - pushes up in fluids       │<br>│ 🧲 MAGNETIC - attracts/repels           │<br>│ ⚡ ELECTROSTATIC - charged objects      │<br>└─────────────────────────────────────────┘<br><br><strong>🔥 Balanced vs Unbalanced:</strong><br>• <strong>Balanced:</strong> Forces equal → stays still or constant speed<br>• <strong>Unbalanced:</strong> Forces unequal → accelerates!<br><br><strong>💡 Force is measured in Newtons (N)</strong>`,
+                'gravity': `<strong>🌍 GRAVITY AND WEIGHT</strong><br><br>The force that keeps your feet on the ground!<br><br><strong>⚡ Key Facts:</strong><br>┌─────────────────────────────────────────┐<br>│ Gravity pulls EVERYTHING towards the    │<br>│ centre of the Earth (or any mass)       │<br>│                                         │<br>│ WEIGHT = MASS × GRAVITY                 │<br>│ W = m × g                               │<br>│                                         │<br>│ On Earth: g = 10 N/kg (approximately)   │<br>└─────────────────────────────────────────┘<br><br><strong>🔥 Mass vs Weight:</strong><br>• <strong>Mass</strong> - amount of matter (kg) - SAME everywhere<br>• <strong>Weight</strong> - force of gravity (N) - CHANGES on different planets<br><br><strong>💡 Examples:</strong><br>If your mass is 50kg:<br>• Weight on Earth = 50 × 10 = 500N<br>• Weight on Moon = 50 × 1.6 = 80N<br>• Moon's gravity is weaker!`,
+                'friction': `<strong>🛑 FRICTION</strong><br><br>The force that opposes movement!<br><br><strong>⚡ What is Friction?</strong><br>• Force between two surfaces touching<br>• Always acts OPPOSITE to movement direction<br>• Caused by surfaces being rough<br><br><strong>🔥 When Friction is USEFUL:</strong><br>┌─────────────────────────────────────────┐<br>│ ✓ Walking (stops you slipping)          │<br>│ ✓ Brakes (stops vehicles)               │<br>│ ✓ Writing (pen grips paper)             │<br>│ ✓ Matches (creates heat to light)       │<br>└─────────────────────────────────────────┘<br><br><strong>💡 When Friction is NOT Useful:</strong><br>• Wastes energy as heat<br>• Wears things down<br>• Slows moving parts in machines<br><br><strong>⚡ Reducing Friction:</strong><br>• Lubricants (oil, grease)<br>• Smoother surfaces<br>• Ball bearings`,
+                'speed': `<strong>🏎️ SPEED, DISTANCE & TIME</strong><br><br>How fast are you going?<br><br><strong>⚡ THE FORMULA TRIANGLE:</strong><br>┌─────────────────────────────────────────┐<br>│            Distance (D)                 │<br>│          ─────────────────              │<br>│          Speed × Time                   │<br>│                                         │<br>│ Speed = Distance ÷ Time                 │<br>│ Distance = Speed × Time                 │<br>│ Time = Distance ÷ Speed                 │<br>└─────────────────────────────────────────┘<br><br><strong>🔥 Example:</strong><br>A cyclist travels 30 km in 2 hours:<br>Speed = 30 ÷ 2 = 15 km/h ✓<br><br><strong>💡 Units:</strong><br>• m/s (metres per second)<br>• km/h (kilometres per hour)<br>• To convert: km/h ÷ 3.6 = m/s<br><br><strong>⚡ Average Speed:</strong><br>Total distance ÷ Total time`,
+                'acceleration': `<strong>🚀 ACCELERATION</strong><br><br>How quickly speed changes!<br><br><strong>⚡ The Formula:</strong><br>┌─────────────────────────────────────────┐<br>│ Acceleration = Change in velocity       │<br>│                ─────────────────        │<br>│                     Time                │<br>│                                         │<br>│ a = (v - u) ÷ t                         │<br>│                                         │<br>│ Units: m/s² (metres per second squared) │<br>└─────────────────────────────────────────┘<br><br><strong>🔥 Example:</strong><br>A car goes from 0 to 20 m/s in 5 seconds:<br>a = (20 - 0) ÷ 5 = 4 m/s² ✓<br><br><strong>💡 Key Terms:</strong><br>• Positive acceleration = speeding up<br>• Negative acceleration (deceleration) = slowing down<br>• Constant velocity = zero acceleration`,
+                'newton': `<strong>🍎 NEWTON'S LAWS OF MOTION</strong><br><br>The three rules that govern all motion!<br><br><strong>⚡ FIRST LAW (Inertia):</strong><br>┌─────────────────────────────────────────┐<br>│ An object stays still or moves at       │<br>│ constant speed UNLESS acted on by       │<br>│ an unbalanced force                     │<br>└─────────────────────────────────────────┘<br><br><strong>⚡ SECOND LAW:</strong><br>┌─────────────────────────────────────────┐<br>│ Force = Mass × Acceleration             │<br>│ F = m × a                               │<br>│ More force = more acceleration          │<br>│ More mass = less acceleration           │<br>└─────────────────────────────────────────┘<br><br><strong>⚡ THIRD LAW:</strong><br>┌─────────────────────────────────────────┐<br>│ Every action has an EQUAL and OPPOSITE  │<br>│ reaction                                │<br>│ Example: Rocket pushes gas down,        │<br>│ gas pushes rocket up!                   │<br>└─────────────────────────────────────────┘`,
+                'pressure': `<strong>🎈 PRESSURE</strong><br><br>Force spread over an area!<br><br><strong>⚡ The Formula:</strong><br>┌─────────────────────────────────────────┐<br>│ Pressure = Force ÷ Area                 │<br>│ P = F ÷ A                               │<br>│                                         │<br>│ Units: N/m² or Pascals (Pa)             │<br>└─────────────────────────────────────────┘<br><br><strong>🔥 Example:</strong><br>A box weighs 600N and has area 2m²:<br>Pressure = 600 ÷ 2 = 300 Pa ✓<br><br><strong>💡 Key Concepts:</strong><br>• Smaller area = MORE pressure<br>• Larger area = LESS pressure<br><br><strong>⚡ Real Examples:</strong><br>• Knife blade - small area, cuts easily<br>• Snowshoes - large area, don't sink<br>• High heels - small area, more pressure<br>• Bed of nails - many points share force`,
+                'moments': `<strong>🔄 MOMENTS (TURNING FORCES)</strong><br><br>Making things rotate!<br><br><strong>⚡ The Formula:</strong><br>┌─────────────────────────────────────────┐<br>│ Moment = Force × Distance from pivot    │<br>│                                         │<br>│ Units: Newton-metres (Nm)               │<br>└─────────────────────────────────────────┘<br><br><strong>🔥 Principle of Moments:</strong><br>For balance: Clockwise moment = Anticlockwise moment<br><br><strong>💡 Example (Seesaw):</strong><br>• Child A: 400N, 2m from pivot = 800 Nm<br>• Child B needs: 800 ÷ 2.5 = 320N at 2.5m<br><br><strong>⚡ Real Applications:</strong><br>• Door handle far from hinge = easier to open<br>• Long spanner = easier to turn nuts<br>• Wheelbarrow design<br>• Steering wheels`,
+                'wave': `<strong>🌊 WAVES - TRANSFERRING ENERGY</strong><br><br>Waves transfer energy without transferring matter!<br><br><strong>⚡ Two Types of Waves:</strong><br>┌─────────────────────────────────────────┐<br>│ TRANSVERSE WAVES:                       │<br>│ • Vibrations perpendicular to direction │<br>│ • Examples: Light, water waves, S-waves │<br>├─────────────────────────────────────────┤<br>│ LONGITUDINAL WAVES:                     │<br>│ • Vibrations parallel to direction      │<br>│ • Examples: Sound, P-waves, slinky      │<br>└─────────────────────────────────────────┘<br><br><strong>🔥 Wave Properties:</strong><br>• <strong>Wavelength (λ)</strong> - distance of one complete wave<br>• <strong>Frequency (f)</strong> - waves per second (Hz)<br>• <strong>Amplitude</strong> - height of wave = loudness/brightness<br>• <strong>Speed</strong> = Frequency × Wavelength (v = fλ)`,
+                'sound': `<strong>🔊 SOUND WAVES</strong><br><br>Vibrations that travel through matter!<br><br><strong>⚡ Key Facts:</strong><br>┌─────────────────────────────────────────┐<br>│ • Sound is a LONGITUDINAL wave          │<br>│ • Needs a MEDIUM to travel (solid,      │<br>│   liquid, or gas)                       │<br>│ • Cannot travel through a vacuum!       │<br>└─────────────────────────────────────────┘<br><br><strong>🔥 Speed of Sound:</strong><br>• In air: ~340 m/s<br>• In water: ~1500 m/s<br>• In steel: ~5000 m/s<br>• Faster in solids than liquids than gases!<br><br><strong>💡 Properties:</strong><br>• <strong>Pitch</strong> = frequency (high frequency = high pitch)<br>• <strong>Volume</strong> = amplitude (more amplitude = louder)<br>• Humans hear: 20 Hz - 20,000 Hz<br>• Below 20 Hz = infrasound<br>• Above 20,000 Hz = ultrasound`,
+                'light': `<strong>💡 LIGHT</strong><br><br>Electromagnetic waves we can see!<br><br><strong>⚡ Key Facts:</strong><br>┌─────────────────────────────────────────┐<br>│ • Light is a TRANSVERSE wave            │<br>│ • Travels at 300,000,000 m/s!           │<br>│ • CAN travel through vacuum (space)     │<br>│ • Travels in straight lines (rays)      │<br>└─────────────────────────────────────────┘<br><br><strong>🔥 Light Behaviours:</strong><br>• <strong>Reflection</strong> - bounces off surfaces<br>• <strong>Refraction</strong> - bends through different materials<br>• <strong>Absorption</strong> - taken in by materials<br><br><strong>💡 Reflection Law:</strong><br>Angle of incidence = Angle of reflection<br><br><strong>🌈 Colours:</strong><br>• White light = all colours mixed<br>• Prism splits light into spectrum<br>• Objects appear coloured by reflecting that colour<br>• Black absorbs all colours`,
+                'reflection': `<strong>🪞 REFLECTION</strong><br><br>Light bouncing off surfaces!<br><br><strong>⚡ The Law of Reflection:</strong><br>┌─────────────────────────────────────────┐<br>│ Angle of incidence = Angle of reflection│<br>│                                         │<br>│ Both angles measured from the NORMAL    │<br>│ (imaginary line perpendicular to mirror)│<br>└─────────────────────────────────────────┘<br><br><strong>🔥 Types of Reflection:</strong><br>• <strong>Regular/Specular:</strong> Smooth surfaces (mirrors) - clear image<br>• <strong>Diffuse:</strong> Rough surfaces - scattered light, no clear image<br><br><strong>💡 Mirror Images:</strong><br>• Same size as object<br>• Same distance behind mirror<br>• Laterally inverted (left↔right swapped)<br>• Virtual image (can't be projected on screen)`,
+                'refraction': `<strong>🔍 REFRACTION</strong><br><br>Light bending when it changes material!<br><br><strong>⚡ What Happens:</strong><br>┌─────────────────────────────────────────┐<br>│ • Light changes speed in different      │<br>│   materials                             │<br>│ • This causes it to bend (change        │<br>│   direction)                            │<br>│ • TOWARDS normal when slowing down      │<br>│ • AWAY from normal when speeding up     │<br>└─────────────────────────────────────────┘<br><br><strong>🔥 Examples:</strong><br>• Straw looks bent in water<br>• Swimming pool looks shallower<br>• Lenses in glasses<br>• Rainbow formation<br><br><strong>💡 Speed Order:</strong><br>Fastest → Slowest:<br>Air → Water → Glass<br>• When entering glass from air, light bends TOWARDS normal`,
+                'convex': `<strong>🔎 LENSES - CONVEX AND CONCAVE</strong><br><br>Curved glass that bends light!<br><br><strong>⚡ CONVEX (Converging) Lens:</strong><br>┌─────────────────────────────────────────┐<br>│ • Thicker in middle                     │<br>│ • Brings light rays together (focuses)  │<br>│ • Creates real images (can be projected)│<br>│ • Used in magnifying glasses, cameras   │<br>│ • Corrects long-sightedness             │<br>└─────────────────────────────────────────┘<br><br><strong>🔥 CONCAVE (Diverging) Lens:</strong><br>┌─────────────────────────────────────────┐<br>│ • Thinner in middle                     │<br>│ • Spreads light rays apart              │<br>│ • Creates virtual images                │<br>│ • Corrects short-sightedness            │<br>└─────────────────────────────────────────┘<br><br><strong>💡 Focal Point:</strong><br>Where parallel rays meet after passing through a convex lens`,
+                'colour': `<strong>🌈 COLOUR AND THE SPECTRUM</strong><br><br>White light is a mix of all colours!<br><br><strong>⚡ The Visible Spectrum:</strong><br>┌─────────────────────────────────────────┐<br>│ R - Red     (longest wavelength)        │<br>│ O - Orange                              │<br>│ Y - Yellow                              │<br>│ G - Green                               │<br>│ B - Blue                                │<br>│ I - Indigo                              │<br>│ V - Violet  (shortest wavelength)       │<br>└─────────────────────────────────────────┘<br><br><strong>🔥 How We See Colour:</strong><br>• Objects ABSORB some colours and REFLECT others<br>• A red apple absorbs all colours EXCEPT red<br>• Black absorbs all colours<br>• White reflects all colours<br><br><strong>💡 Primary Colours of Light:</strong><br>Red + Green + Blue = White`,
+                'electromagnetic': `<strong>📡 THE ELECTROMAGNETIC SPECTRUM</strong><br><br>All forms of electromagnetic radiation!<br><br><strong>⚡ The Spectrum (longest to shortest wavelength):</strong><br>┌─────────────────────────────────────────┐<br>│ 📻 RADIO WAVES - TV, radio signals      │<br>│ 🌊 MICROWAVES - cooking, phones         │<br>│ 🔥 INFRARED - heat, remote controls     │<br>│ 👁️ VISIBLE LIGHT - what we see         │<br>│ ☀️ ULTRAVIOLET - sunburn, sterilising   │<br>│ ☢️ X-RAYS - medical imaging             │<br>│ ⚡ GAMMA RAYS - cancer treatment        │<br>└─────────────────────────────────────────┘<br><br><strong>🔥 Key Facts:</strong><br>• ALL travel at speed of light in vacuum<br>• ALL are transverse waves<br>• Higher frequency = shorter wavelength = more energy<br>• Gamma rays = most dangerous (most energy)`,
+                'static': `<strong>⚡ STATIC ELECTRICITY</strong><br><br>When charges build up and stay put!<br><br><strong>🔥 How It Happens:</strong><br>• Friction transfers electrons between materials<br>• Object gaining electrons becomes NEGATIVE<br>• Object losing electrons becomes POSITIVE<br><br><strong>⚡ The Rules:</strong><br>┌─────────────────────────────────────────┐<br>│ Like charges → REPEL (push apart)       │<br>│ Opposite charges → ATTRACT (pull)       │<br>└─────────────────────────────────────────┘<br><br><strong>💡 Everyday Examples:</strong><br>• Balloon sticking to wall<br>• Hair standing up after brushing<br>• Shock from door handles<br>• Lightning!<br><br><strong>⚠️ Dangers:</strong><br>• Sparks near fuel = explosion risk<br>• Damage to electronics`,
+                'current': `<strong>🔌 ELECTRIC CURRENT</strong><br><br>The flow of electric charge!<br><br><strong>⚡ Key Concepts:</strong><br>┌─────────────────────────────────────────┐<br>│ CURRENT (I):                            │<br>│ • Flow of electrons around circuit      │<br>│ • Measured in AMPS (A)                  │<br>│ • Needs complete circuit to flow        │<br>├─────────────────────────────────────────┤<br>│ VOLTAGE (V):                            │<br>│ • "Push" that drives current            │<br>│ • Measured in VOLTS (V)                 │<br>│ • Like water pressure in pipes          │<br>├─────────────────────────────────────────┤<br>│ RESISTANCE (R):                         │<br>│ • Opposes current flow                  │<br>│ • Measured in OHMS (Ω)                  │<br>└─────────────────────────────────────────┘<br><br><strong>💡 OHM'S LAW:</strong><br>V = I × R (Voltage = Current × Resistance)`,
+                'circuit': `<strong>🔋 ELECTRICAL CIRCUITS</strong><br><br>Complete loops for electricity to flow!<br><br><strong>⚡ Circuit Symbols:</strong><br>┌─────────────────────────────────────────┐<br>│ ─── Wire                                │<br>│ ─┤├─ Cell (battery unit)                │<br>│ ─┤├┤├─ Battery (multiple cells)         │<br>│ ─/─ Switch (open)                       │<br>│ ──── Switch (closed)                    │<br>│ ─Ω─ Resistor                            │<br>│ ─⊗─ Lamp/Bulb                           │<br>│ ─A─ Ammeter (measures current)          │<br>│ ─V─ Voltmeter (measures voltage)        │<br>└─────────────────────────────────────────┘<br><br><strong>🔥 Series vs Parallel:</strong><br>• <strong>Series:</strong> One path, current same everywhere, voltages add up<br>• <strong>Parallel:</strong> Multiple paths, voltage same across branches<br><br><strong>💡 Ammeter:</strong> In series<br><strong>💡 Voltmeter:</strong> In parallel`,
+                'resistance': `<strong>🚧 RESISTANCE</strong><br><br>How much a material opposes current!<br><br><strong>⚡ Ohm's Law:</strong><br>┌─────────────────────────────────────────┐<br>│ R = V ÷ I                               │<br>│ Resistance = Voltage ÷ Current          │<br>│ Measured in Ohms (Ω)                    │<br>└─────────────────────────────────────────┘<br><br><strong>🔥 What Affects Resistance?</strong><br>• <strong>Length:</strong> Longer = more resistance<br>• <strong>Thickness:</strong> Thinner = more resistance<br>• <strong>Material:</strong> Some conduct better<br>• <strong>Temperature:</strong> Hotter = usually more resistance<br><br><strong>💡 Conductors vs Insulators:</strong><br>• Conductors (metals): Low resistance<br>• Insulators (plastic): High resistance<br>• Semiconductors: In between`,
+                'magnet': `<strong>🧲 MAGNETS AND MAGNETIC FIELDS</strong><br><br>Invisible forces from magnetic materials!<br><br><strong>⚡ Key Facts:</strong><br>┌─────────────────────────────────────────┐<br>│ • Every magnet has NORTH and SOUTH pole │<br>│ • OPPOSITE poles ATTRACT (N↔S)          │<br>│ • SAME poles REPEL (N↔N, S↔S)           │<br>│ • Magnetic field goes N → S externally  │<br>└─────────────────────────────────────────┘<br><br><strong>🔥 Magnetic Materials:</strong><br>• Iron, nickel, cobalt, steel<br>• Called "ferromagnetic"<br><br><strong>💡 Magnetic Field:</strong><br>• Area where magnetic force acts<br>• Shown by field lines (N to S)<br>• Closer lines = stronger field<br>• Can be seen with iron filings`,
+                'electromagnet': `<strong>🧲 ELECTROMAGNETS</strong><br><br>Magnets you can switch on and off!<br><br><strong>⚡ How They Work:</strong><br>┌─────────────────────────────────────────┐<br>│ Current flowing through a wire creates  │<br>│ a magnetic field around it              │<br>│                                         │<br>│ Coil the wire + add iron core =         │<br>│ STRONG electromagnet!                   │<br>└─────────────────────────────────────────┘<br><br><strong>🔥 Making Them Stronger:</strong><br>• More coils of wire<br>• More current<br>• Soft iron core<br><br><strong>💡 Uses:</strong><br>• Scrapyard cranes (lifting metal)<br>• Electric bells and buzzers<br>• MRI scanners<br>• Speakers and headphones<br>• Electric motors`,
+                'space': `<strong>🌌 THE SOLAR SYSTEM AND SPACE</strong><br><br>Our cosmic neighbourhood!<br><br><strong>⚡ The Solar System:</strong><br>┌─────────────────────────────────────────┐<br>│ ☀️ SUN (star at centre)                 │<br>│ Mercury, Venus, EARTH, Mars             │<br>│ (rocky planets)                         │<br>│ Asteroid Belt                           │<br>│ Jupiter, Saturn, Uranus, Neptune        │<br>│ (gas giants)                            │<br>└─────────────────────────────────────────┘<br><br><strong>🔥 Key Terms:</strong><br>• <strong>Star:</strong> Ball of gas producing light/heat (fusion)<br>• <strong>Planet:</strong> Orbits a star, large, cleared orbit<br>• <strong>Moon:</strong> Natural satellite orbiting a planet<br>• <strong>Asteroid:</strong> Rocky object orbiting the Sun<br>• <strong>Comet:</strong> Ice and rock, long tails near Sun<br>• <strong>Galaxy:</strong> Billions of stars (we're in Milky Way)<br><br><strong>💡 Light Year:</strong><br>Distance light travels in 1 year = ~9.5 trillion km!`,
+                'daynight': `<strong>🌙 DAY, NIGHT AND SEASONS</strong><br><br>Earth's movements cause day, night, and seasons!<br><br><strong>⚡ Day and Night:</strong><br>┌─────────────────────────────────────────┐<br>│ • Earth ROTATES (spins) on its axis     │<br>│ • One rotation = 24 hours (one day)     │<br>│ • Side facing Sun = day                 │<br>│ • Side facing away = night              │<br>└─────────────────────────────────────────┘<br><br><strong>🔥 Seasons:</strong><br>• Earth ORBITS the Sun (takes 1 year)<br>• Earth's axis is TILTED at 23.5°<br>• When North tilts towards Sun = summer in North<br>• When North tilts away = winter in North<br><br><strong>💡 Important:</strong><br>• UK gets summer when Northern Hemisphere tilts toward Sun<br>• More direct sunlight = warmer<br>• Longer days in summer`,
+                'energy': `<strong>⚡ ENERGY STORES AND TRANSFERS</strong><br><br>Energy cannot be created or destroyed - only transferred!<br><br><strong>⚡ Energy Stores:</strong><br>┌─────────────────────────────────────────┐<br>│ 🔋 CHEMICAL - in food, fuel, batteries  │<br>│ 🏃 KINETIC - moving objects             │<br>│ ⬆️ GRAVITATIONAL POTENTIAL - height      │<br>│ 🌡️ THERMAL - heat energy               │<br>│ 🧲 MAGNETIC - in magnets                │<br>│ ⚡ ELECTROSTATIC - in charges           │<br>│ 🔄 ELASTIC POTENTIAL - stretched things │<br>│ ☢️ NUCLEAR - in atoms                   │<br>└─────────────────────────────────────────┘<br><br><strong>🔥 Energy Transfers:</strong><br>• Mechanically (by forces)<br>• Electrically (through wires)<br>• By heating<br>• By radiation (light, sound waves)<br><br><strong>💡 Conservation of Energy:</strong><br>Total energy before = Total energy after`,
+                'power': `<strong>⚡ POWER</strong><br><br>How quickly energy is transferred!<br><br><strong>⚡ The Formula:</strong><br>┌─────────────────────────────────────────┐<br>│ Power = Energy ÷ Time                   │<br>│ P = E ÷ t                               │<br>│                                         │<br>│ OR                                      │<br>│ Power = Work Done ÷ Time                │<br>│                                         │<br>│ Units: WATTS (W) or Joules per second   │<br>└─────────────────────────────────────────┘<br><br><strong>🔥 Example:</strong><br>A kettle uses 180,000 J in 2 minutes (120s):<br>Power = 180,000 ÷ 120 = 1500W = 1.5kW ✓<br><br><strong>💡 Common Power Ratings:</strong><br>• Phone charger: ~5W<br>• Light bulb: 40-100W<br>• Kettle: 2000-3000W<br>• Electric shower: 8000-10000W`
+            },
+            wellbeing: {
+                'stress': `<strong>🧘 MANAGING STRESS</strong><br><br>Stress is normal - but you can control it!<br><br><strong>⚡ Quick Stress Busters:</strong><br>┌─────────────────────────────────┐<br>│ 🫁 Box Breathing: 4-4-4-4       │<br>│    (In-Hold-Out-Hold)           │<br>│ 🚶 Take a 10-minute walk        │<br>│ 🎵 Listen to calming music      │<br>│ 📝 Write down your worries      │<br>│ 💬 Talk to someone you trust    │<br>└─────────────────────────────────┘<br><br><strong>🔥 Long-term Strategies:</strong><br>• Get enough sleep (8-10 hours!)<br>• Exercise regularly<br>• Break big tasks into small steps<br>• Limit screen time before bed<br>• Practice saying "no" sometimes<br><br>💚 Remember: It's okay to ask for help. Teachers, parents, and counsellors want to support you!`,
+                'focus': `<strong>🎯 LASER FOCUS MODE</strong><br><br>Concentration is a superpower - here's how to unlock it!<br><br><strong>⚡ The Pomodoro Technique:</strong><br>┌─────────────────────────────────┐<br>│ 🍅 25 minutes focused work      │<br>│ ☕ 5 minute break               │<br>│ 🔄 Repeat 4 times               │<br>│ 🎉 Longer 15-30 min break       │<br>└─────────────────────────────────┘<br><br><strong>🔥 Focus Boosters:</strong><br>• Phone in another room (seriously!)<br>• Clear desk = clear mind<br>• Drink water - dehydration kills focus<br>• Use noise-cancelling or lo-fi music<br>• Set specific goals for each session<br><br><strong>💡 Pro Tips:</strong><br>• Do hardest tasks when energy is highest<br>• Reward yourself after focus sessions<br>• One tab, one task at a time!`,
+                'confidence': `<strong>💪 BUILDING CONFIDENCE</strong><br><br>Confidence isn't born - it's built!<br><br><strong>⚡ Confidence Builders:</strong><br>┌─────────────────────────────────┐<br>│ 🏆 Celebrate small wins         │<br>│ 🪞 Positive self-talk           │<br>│ 🎯 Set achievable goals         │<br>│ 📚 Prepare and practice         │<br>│ 🤝 Help others                  │<br>│ 💪 Power poses (2 min)          │<br>└─────────────────────────────────┘<br><br><strong>🔥 Reframe Your Thinking:</strong><br>❌ "I can't do this"<br>✅ "I can't do this YET"<br><br>❌ "I'm going to fail"<br>✅ "I'm going to learn"<br><br><strong>💚 Remember:</strong> Everyone feels unsure sometimes - even the most confident people you know!`,
+                'friend': `<strong>🤝 HEALTHY FRIENDSHIPS</strong><br><br>Good friends make life better!<br><br><strong>⚡ Signs of a Good Friend:</strong><br>┌─────────────────────────────────┐<br>│ ✓ Listens to you                │<br>│ ✓ Respects your boundaries      │<br>│ ✓ Celebrates your wins          │<br>│ ✓ Is honest but kind            │<br>│ ✓ Makes you feel good           │<br>│ ✓ Keeps your secrets            │<br>└─────────────────────────────────┘<br><br><strong>🚩 Red Flags:</strong><br>• Puts you down or embarrasses you<br>• Pressures you to do things<br>• Only talks about themselves<br>• Gossips about you<br><br><strong>💚 Remember:</strong> Quality over quantity - a few true friends beat many fake ones! If a friendship feels wrong, talk to a trusted adult.`
+            }
+        };
+
+        // Blocked content patterns for safeguarding
+        const blockedPatterns = [
+            /personal\s*(info|information|details)/i,
+            /phone\s*number/i,
+            /address/i,
+            /password/i,
+            /credit\s*card/i,
+            /social\s*security/i,
+            /where\s*(do\s*you|are\s*you)\s*live/i,
+            /how\s*old\s*are\s*you/i,
+            /what('?s)?\s*your\s*(name|age|school)/i,
+            /meet\s*(up|me)/i,
+            /dating/i,
+            /boyfriend|girlfriend/i,
+            /inappropriate/i,
+            /drugs/i,
+            /alcohol/i,
+            /violence/i,
+            /weapons/i,
+            /hate/i,
+            /bully/i
+        ];
+
+        // Check for blocked content
+        function containsBlockedContent(text) {
+            return blockedPatterns.some(pattern => pattern.test(text));
+        }
+
+        // Select subject
+        function selectSubject(subject, btn) {
+            currentSubject = subject;
+            
+            // Update active button
+            document.querySelectorAll('.subject-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            // Update header
+            document.getElementById('currentSubject').textContent = subjectData[subject].name;
+
+            // Update quick prompts
+            updateQuickPrompts(subject);
+
+            // Add subject change message
+            addMessage(`Switched to ${subjectData[subject].icon} <strong>${subjectData[subject].name}</strong> mode! Ask me anything - I'm ready to help! 🚀`, 'bot');
+        }
+
+        function updateQuickPrompts(subject) {
+            const container = document.getElementById('quickPrompts');
+            const prompts = subjectData[subject].prompts;
+            
+            container.innerHTML = prompts.map(prompt => 
+                `<button class="quick-prompt" onclick="usePrompt('${prompt}')">${prompt}</button>`
+            ).join('');
+        }
+
+        // Use quick prompt
+        function usePrompt(prompt) {
+            document.getElementById('userInput').value = prompt;
+            sendMessage();
+        }
+
+        // Handle keyboard input
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        // Auto-resize textarea
+        document.getElementById('userInput').addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+
+        // Add message to chat
+        function addMessage(content, type) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            
+            const avatar = type === 'bot' ? '🤖' : '👤';
+            
+            messageDiv.innerHTML = `
+                <div class="message-avatar">${avatar}</div>
+                <div class="message-content">${content}</div>
+            `;
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            // Store in conversation history for follow-ups
+            conversationHistory.push({ type, content });
+        }
+
+        // Add typing indicator
+        function showTyping() {
+            const messagesContainer = document.getElementById('chatMessages');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message bot';
+            typingDiv.id = 'typingIndicator';
+            
+            typingDiv.innerHTML = `
+                <div class="message-avatar">🤖</div>
+                <div class="typing-indicator">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            `;
+            
+            messagesContainer.appendChild(typingDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function removeTyping() {
+            const typing = document.getElementById('typingIndicator');
+            if (typing) typing.remove();
+        }
+
+        // Send message
+        async function sendMessage() {
+            const input = document.getElementById('userInput');
+            const message = input.value.trim();
+            
+            if (!message || isTyping) return;
+
+            // Check for blocked content
+            if (containsBlockedContent(message)) {
+                addMessage(message, 'user');
+                input.value = '';
+                input.style.height = 'auto';
+                
+                setTimeout(() => {
+                    addMessage(`🛡️ I noticed your question might be about personal information or sensitive topics. I'm here to help with your studies!<br><br>For safety reasons, I can't discuss:<br>• Personal details<br>• Topics not suitable for school<br><br>If you're worried about something, please talk to a trusted adult like a parent, teacher, or counsellor. They're there for you! 💚`, 'bot');
+                }, 500);
+                return;
+            }
+
+            // Add user message
+            addMessage(message, 'user');
+            input.value = '';
+            input.style.height = 'auto';
+
+            // Show typing
+            isTyping = true;
+            document.getElementById('sendBtn').disabled = true;
+            showTyping();
+
+            // Generate response
+            const response = await generateResponse(message);
+            
+            // Remove typing and add response
+            removeTyping();
+            addMessage(response, 'bot');
+            
+            isTyping = false;
+            document.getElementById('sendBtn').disabled = false;
+        }
+
+        // Generate response
+        async function generateResponse(userMessage) {
+            await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 1000));
+
+            const lowerMessage = userMessage.toLowerCase();
+            const subjectResponses = responses[currentSubject];
+            
+            // Keywords mapping for better matching - expanded for more natural questions
+            const keywordMap = {
+                maths: {
+                    'equation': ['equation', 'solve', 'solving', 'algebra', 'x =', 'find x', 'variable', 'unknown', 'work out', 'calculate', 'equals'],
+                    'fraction': ['fraction', 'numerator', 'denominator', 'divide', 'half', 'quarter', 'third', 'top and bottom', 'simplify fraction'],
+                    'percentage': ['percent', 'percentage', '%', 'out of 100', 'hundred', 'increase by', 'decrease by', 'discount', 'vat', 'tax'],
+                    'pythagoras': ['pythagoras', 'hypotenuse', 'right angle triangle', 'triangle theorem', 'a² + b²', 'squared', 'pythagorean'],
+                    'pythagoras2d': ['diagonal', '2d pythagoras', 'distance between points', 'isoceles height', 'rectangle diagonal', 'coordinate distance'],
+                    'ratio': ['ratio', 'simplify ratio', 'proportion', 'parts', 'comparing quantities', 'hcf ratio'],
+                    'sharing': ['sharing ratio', 'share', 'divide in ratio', 'split', 'given ratio', 'share in ratio'],
+                    'direct': ['direct proportion', 'directly proportional', 'unitary method', 'more items more cost', 'recipe amounts'],
+                    'inverse': ['inverse proportion', 'inversely proportional', 'more workers less time', 'product constant'],
+                    'currency': ['currency', 'exchange rate', 'convert money', 'pounds to euros', 'dollars', 'foreign money', 'best deal'],
+                    'speed': ['speed', 'distance', 'time', 'km/h', 'mph', 'm/s', 'how fast', 'how long to travel', 'velocity'],
+                    'rates': ['rates', 'pay rate', 'per hour', 'fuel consumption', 'mpg', 'best value', 'price per', 'density'],
+                    'angle': ['angle', 'degree', 'angles in triangle', 'angles in quadrilateral', 'straight line', '180', 'vertically opposite', 'angle facts'],
+                    'parallel': ['parallel lines', 'alternate', 'corresponding', 'co-interior', 'z-angle', 'f-angle', 'transversal'],
+                    'quadrilateral': ['quadrilateral angles', 'parallelogram', 'trapezium', 'rhombus', 'kite angles', 'rectangle angles'],
+                    'polygon': ['polygon', 'pentagon', 'hexagon', 'octagon', 'interior angles', 'exterior angles', 'regular polygon'],
+                    'bearing': ['bearing', 'bearings', 'north', 'compass', 'direction', '3 digit', 'clockwise from north'],
+                    'bearingcalc': ['back bearing', 'return bearing', 'calculate bearing', 'bearing from', 'reverse bearing'],
+                    'algebra': ['algebra', 'expression', 'simplify', 'expand', 'bracket', 'factorise', 'like terms', 'coefficient'],
+                    'area': ['area', 'rectangle area', 'triangle area', 'circle area', 'compound shape', 'parallelogram area', 'trapezium area']
+                },
+                english: {
+                    'persuasive': ['persuasive', 'persuade', 'convince', 'argument', 'aforest', 'rhetorical', 'opinion', 'debate', 'letter', 'speech', 'modal verb'],
+                    'descriptive': ['descriptive', 'describe', 'description', 'five senses', 'show dont tell', 'pathetic fallacy', 'setting', 'atmosphere', 'sensory'],
+                    'techniques': ['technique', 'simile', 'metaphor', 'personification', 'hyperbole', 'alliteration', 'onomatopoeia', 'oxymoron', 'juxtaposition', 'sibilance', 'assonance', 'figurative'],
+                    'analysis': ['analyse', 'analysis', 'peel', 'pee paragraph', 'quote', 'evidence', 'effect', 'connotation', 'imply', 'suggests'],
+                    'poem': ['poem', 'poetry', 'verse', 'stanza', 'rhyme', 'rhythm', 'enjambment', 'caesura', 'volta', 'imagery', 'tone', 'mood', 'smile framework'],
+                    'shakespeare': ['shakespeare', 'thou', 'thee', 'thy', 'hath', 'doth', 'wherefore', 'romeo', 'macbeth', 'hamlet', 'juliet', 'elizabethan', 'bard'],
+                    'grammar': ['grammar', 'punctuation', 'their there', 'your you', 'apostrophe', 'comma', 'semicolon', 'full stop', 'sentence', 'clause', 'colon', 'dash'],
+                    'narrative': ['narrative', 'story', 'creative writing', 'plot', 'character', 'beginning', 'ending', 'climax', 'resolution', 'exposition', 'opening'],
+                    'writing': ['creative', 'write', 'writing', 'paragraph', 'structure', 'hook', 'tension', 'cliffhanger'],
+                    'vocab': ['vocabulary', 'vocab', 'word', 'synonym', 'alternative', 'formal', 'informal', 'transition', 'connective']
+                },
+                biology: {
+                    'dna': ['dna', 'double helix', 'nucleotide', 'base pair', 'genetic code', 'adenine', 'thymine', 'guanine', 'cytosine'],
+                    'gene': ['gene', 'chromosome', 'allele', 'dominant', 'recessive', 'inherit', 'genetic', 'genetics', 'trait', 'offspring', 'parent'],
+                    'variation': ['variation', 'environmental', 'inherited', 'different', 'unique', 'mutation', 'biodiversity', 'genotype', 'phenotype'],
+                    'extinct': ['extinct', 'extinction', 'endangered', 'species', 'died out', 'dinosaur', 'conservation', 'habitat loss', 'threatened', 'rare'],
+                    'photosynthesis': ['photosynthesis', 'chloroplast', 'chlorophyll', 'light energy', 'carbon dioxide', 'co2', 'oxygen', 'o2', 'sunlight', 'green', 'make food'],
+                    'glucose': ['glucose', 'sugar', 'starch', 'energy', 'carbohydrate', 'c6h12o6', 'food', 'monosaccharide'],
+                    'respiration': ['respiration', 'aerobic', 'anaerobic', 'mitochondria', 'lactic acid', 'fermentation', 'atp', 'cellular', 'release energy'],
+                    'transpiration': ['transpiration', 'evaporation', 'stomata', 'water loss', 'xylem', 'water transport'],
+                    'plant': ['plant', 'grow', 'root', 'stem', 'flower', 'seed', 'germination', 'phloem', 'auxin', 'tropism', 'phototropism', 'gravitropism'],
+                    'leaf': ['leaf', 'leaves', 'palisade', 'mesophyll', 'epidermis', 'guard cell', 'cuticle', 'vein'],
+                    'adaptation': ['adapt', 'adaptation', 'survive', 'desert', 'cactus', 'evolved', 'evolution', 'natural selection', 'environment', 'camouflage', 'predator', 'prey'],
+                    'plant product': ['plant product', 'medicine', 'rubber', 'cotton', 'useful plant', 'crop', 'drug', 'herbal', 'fibre', 'oil'],
+                    'cell': ['cell', 'nucleus', 'cytoplasm', 'membrane', 'mitochondria', 'ribosome', 'organelle', 'cell wall', 'vacuole', 'microscope'],
+                    'digestion': ['digestion', 'digestive', 'stomach', 'intestine', 'enzyme', 'amylase', 'protease', 'lipase', 'gut', 'absorb', 'food', 'eat'],
+                    'circulation': ['circulation', 'circulatory', 'blood vessel', 'artery', 'vein', 'capillary', 'transport'],
+                    'heart': ['heart', 'pump', 'beat', 'cardiac', 'ventricle', 'atrium', 'valve', 'pulse', 'chamber'],
+                    'blood': ['blood', 'red blood', 'white blood', 'platelet', 'plasma', 'haemoglobin', 'clot', 'oxygen'],
+                    'breathing': ['breathing', 'breath', 'lung', 'lungs', 'respiratory', 'alveoli', 'trachea', 'bronchi', 'diaphragm', 'inhale', 'exhale', 'gas exchange'],
+                    'nervous': ['nervous', 'nerve', 'brain', 'spinal', 'neurone', 'neuron', 'reflex', 'sensory', 'motor', 'synapse', 'impulse', 'receptor'],
+                    'enzyme': ['enzyme', 'catalyst', 'active site', 'substrate', 'denature', 'optimum', 'lock and key', 'biological catalyst'],
+                    'immune': ['immune', 'immunity', 'antibody', 'antigen', 'pathogen', 'white blood cell', 'phagocyte', 'lymphocyte', 'vaccination', 'vaccine', 'disease', 'infection', 'bacteria', 'virus'],
+                    'reproduction': ['reproduction', 'reproduce', 'gamete', 'sperm', 'egg', 'fertilisation', 'sexual', 'asexual', 'clone', 'pollen', 'pollination', 'ovule', 'embryo', 'fetus']
+                },
+                chemistry: {
+                    'atom': ['atom', 'atomic', 'proton', 'neutron', 'electron', 'nucleus', 'shell', 'orbit', 'subatomic', 'particle', 'charge'],
+                    'element': ['element', 'symbol', 'pure substance', 'hydrogen', 'oxygen', 'carbon', 'pure metal', 'periodic'],
+                    'compound': ['compound', 'formula', 'h2o', 'co2', 'nacl', 'chemical bond', 'bonded', 'mixture vs compound'],
+                    'periodictable': ['periodic table', 'period', 'group', 'alkali metal', 'halogen', 'noble gas', 'transition metal', 'mendeleev'],
+                    'metal': ['metal', 'metallic', 'conductor', 'malleable', 'ductile', 'lustrous', 'shiny', 'sonorous'],
+                    'nonmetal': ['non-metal', 'nonmetal', 'insulator', 'brittle', 'dull', 'sulfur', 'nitrogen'],
+                    'acid': ['acid', 'alkali', 'base', 'ph', 'indicator', 'litmus', 'neutral', 'hydroxide', 'sour', 'corrosive', 'acidic', 'alkaline'],
+                    'neutralisation': ['neutralisation', 'neutralization', 'acid base', 'salt water', 'indigestion', 'antacid', 'acid alkali'],
+                    'reaction': ['reaction', 'react', 'chemical change', 'precipitate', 'colour change', 'gas produced', 'bubbles', 'fizz'],
+                    'combustion': ['combustion', 'burn', 'burning', 'fire', 'flame', 'fuel', 'complete combustion', 'incomplete combustion', 'carbon monoxide'],
+                    'oxidation': ['oxidation', 'oxidise', 'rust', 'rusting', 'reduction', 'redox', 'extraction', 'corrode', 'corrosion'],
+                    'statesofmatter': ['state of matter', 'solid', 'liquid', 'gas', 'particle', 'melt', 'freeze', 'boil', 'evaporate', 'condense', 'sublimation'],
+                    'diffusion': ['diffusion', 'diffuse', 'spread', 'particles moving', 'concentration', 'perfume', 'smell'],
+                    'separation': ['separation', 'separate', 'filtration', 'filter', 'evaporation', 'distillation', 'chromatography', 'pure', 'mixture'],
+                    'reactivity': ['reactivity', 'reactive', 'reactivity series', 'potassium', 'sodium', 'zinc', 'iron', 'gold', 'copper', 'unreactive'],
+                    'displacement': ['displacement', 'displace', 'replace', 'more reactive', 'less reactive', 'takes place', 'swap', 'thermite'],
+                    'ceramics': ['ceramic', 'clay', 'pottery', 'brick', 'tile', 'porcelain', 'kiln', 'fired', 'heat resistant'],
+                    'polymer': ['polymer', 'plastic', 'monomer', 'chain', 'polyethene', 'nylon', 'pvc', 'synthetic', 'long chain', 'polymerisation'],
+                    'composite': ['composite', 'concrete', 'fibreglass', 'carbon fibre', 'combine', 'reinforced', 'lightweight', 'mdf'],
+                    'energy': ['exothermic', 'endothermic', 'energy change', 'heat released', 'heat absorbed', 'temperature change', 'cold pack', 'hand warmer'],
+                    'wordequation': ['word equation', 'symbol equation', 'balance', 'balancing', 'reactants', 'products', 'state symbol', 'aq']
+                },
+                physics: {
+                    'force': ['force', 'push', 'pull', 'newton', 'balanced', 'unbalanced', 'resultant', 'net force', 'air resistance', 'upthrust', 'thrust'],
+                    'gravity': ['gravity', 'gravitational', 'weight', 'mass', 'fall', 'falling', 'g force', 'earth pull', 'moon weight', 'planet weight'],
+                    'friction': ['friction', 'rub', 'rough', 'smooth', 'grip', 'brake', 'lubricant', 'oil', 'sliding'],
+                    'speed': ['speed', 'distance', 'time', 'velocity', 'fast', 'slow', 'km/h', 'm/s', 'mph', 'calculate speed', 'how fast', 'average speed'],
+                    'acceleration': ['acceleration', 'accelerate', 'speed up', 'slow down', 'deceleration', 'm/s²', 'change in velocity'],
+                    'newton': ['newton law', 'newton\'s law', 'first law', 'second law', 'third law', 'f=ma', 'inertia', 'action reaction'],
+                    'pressure': ['pressure', 'pascal', 'force area', 'n/m²', 'knife', 'snowshoe', 'high heels', 'bed of nails'],
+                    'moments': ['moment', 'turning', 'pivot', 'lever', 'torque', 'rotate', 'seesaw', 'balance', 'fulcrum', 'clockwise', 'anticlockwise', 'spanner'],
+                    'wave': ['wave', 'wavelength', 'frequency', 'amplitude', 'transverse', 'longitudinal', 'vibration', 'oscillation', 'hertz'],
+                    'sound': ['sound', 'pitch', 'volume', 'loudness', 'echo', 'ultrasound', 'vibrate', 'hear', 'ear', 'noise'],
+                    'light': ['light', 'ray', 'beam', 'speed of light', 'straight lines', 'shadow', 'transparent', 'translucent', 'opaque'],
+                    'reflection': ['reflection', 'reflect', 'mirror', 'angle of incidence', 'normal', 'plane mirror', 'image'],
+                    'refraction': ['refraction', 'refract', 'bend', 'bending light', 'prism', 'lens', 'optical density', 'straw in water'],
+                    'convex': ['convex', 'concave', 'lens', 'magnifying', 'focus', 'focal point', 'glasses', 'spectacles', 'long sight', 'short sight'],
+                    'colour': ['colour', 'color', 'spectrum', 'rainbow', 'red orange yellow', 'roygbiv', 'primary colour', 'absorb reflect'],
+                    'electromagnetic': ['electromagnetic', 'radio', 'microwave', 'infrared', 'ultraviolet', 'x-ray', 'gamma', 'radiation', 'em spectrum'],
+                    'static': ['static', 'charge', 'electron', 'balloon', 'shock', 'lightning', 'rubbing', 'hair', 'spark', 'attract'],
+                    'current': ['current', 'amp', 'ampere', 'ammeter', 'flow', 'electron flow', 'ohm law'],
+                    'circuit': ['circuit', 'voltage', 'volt', 'battery', 'cell', 'bulb', 'switch', 'series', 'parallel', 'wire', 'component', 'symbol'],
+                    'resistance': ['resistance', 'ohm', 'resistor', 'conductor', 'insulator', 'oppose', 'thick wire', 'thin wire'],
+                    'magnet': ['magnet', 'magnetic', 'north pole', 'south pole', 'attract', 'repel', 'iron', 'nickel', 'cobalt', 'field lines', 'compass'],
+                    'electromagnet': ['electromagnet', 'coil', 'solenoid', 'electric magnet', 'iron core', 'stronger', 'on off', 'crane', 'bell'],
+                    'space': ['space', 'solar system', 'planet', 'star', 'sun', 'moon', 'galaxy', 'universe', 'asteroid', 'comet', 'orbit', 'light year'],
+                    'daynight': ['day night', 'season', 'rotate', 'tilt', 'axis', 'summer', 'winter', 'earth rotation', 'year'],
+                    'energy': ['energy store', 'kinetic', 'potential', 'gravitational potential', 'chemical energy', 'thermal', 'elastic', 'nuclear', 'transfer'],
+                    'power': ['power', 'watt', 'joule', 'energy per second', 'kilowatt', 'power rating', 'kettle', 'appliance']
+                },
+                wellbeing: {
+                    'stress': ['stress', 'stressed', 'anxious', 'anxiety', 'worried', 'pressure', 'overwhelm', 'exam', 'panic'],
+                    'focus': ['focus', 'concentrate', 'distract', 'attention', 'study', 'revision', 'pomodoro'],
+                    'confidence': ['confidence', 'confident', 'believe', 'self-esteem', 'nervous', 'shy', 'brave'],
+                    'friend': ['friend', 'friendship', 'social', 'lonely', 'relationship', 'peer', 'group', 'left out', 'bully']
+                }
+            };
+            
+            // Find best matching response
+            let response = null;
+            let matchedTopic = null;
+            
+            const currentKeywords = keywordMap[currentSubject] || {};
+            
+            for (const [topic, keywords] of Object.entries(currentKeywords)) {
+                for (const keyword of keywords) {
+                    if (lowerMessage.includes(keyword)) {
+                        response = subjectResponses[topic];
+                        matchedTopic = topic;
+                        lastTopic = topic;
+                        break;
+                    }
+                }
+                if (response) break;
+            }
+            
+            // Handle follow-up questions
+            if (!response) {
+                const followUpPatterns = [
+                    /tell me more/i, /explain more/i, /what else/i, /more about/i,
+                    /can you explain/i, /how does that work/i, /why is that/i,
+                    /what do you mean/i, /give me an example/i, /another example/i,
+                    /go on/i, /continue/i, /yes/i, /yeah/i, /ok/i, /okay/i, /sure/i,
+                    /really/i, /interesting/i, /cool/i, /wow/i
+                ];
+                
+                const isFollowUp = followUpPatterns.some(pattern => pattern.test(lowerMessage));
+                
+                if (isFollowUp && lastTopic && subjectResponses[lastTopic]) {
+                    const extraInfo = getFollowUpInfo(currentSubject, lastTopic);
+                    response = extraInfo;
+                }
+            }
+            
+            // Default intelligent responses based on subject
+            if (!response) {
+                response = getContextualResponse(currentSubject, lowerMessage);
+            }
+
+            return response;
+        }
+        
+        // Get follow-up information
+        function getFollowUpInfo(subject, topic) {
+            const followUps = {
+                maths: {
+                    'equation': `<strong>🔥 More on Equations!</strong><br><br><strong>Equations with Brackets:</strong><br>Solve 2(x + 3) = 14<br>• First, expand: 2x + 6 = 14<br>• Then: 2x = 8<br>• Finally: x = 4<br><br><strong>Equations with x on Both Sides:</strong><br>Solve 5x + 2 = 3x + 10<br>• Move x terms: 5x - 3x = 10 - 2<br>• Simplify: 2x = 8<br>• Answer: x = 4<br><br>Keep practicing - you've got this! 💪`,
+                    'fraction': `<strong>🍕 More Fraction Tricks!</strong><br><br><strong>Mixed Numbers to Improper:</strong><br>2⅓ → (2×3)+1 = 7/3<br><br><strong>Comparing Fractions:</strong><br>Which is bigger: 3/4 or 5/6?<br>• Cross multiply: 3×6=18, 4×5=20<br>• 20 > 18, so 5/6 is bigger!<br><br><strong>Converting to Decimals:</strong><br>Just divide top by bottom!<br>• 3/4 = 3 ÷ 4 = 0.75<br>• 1/8 = 1 ÷ 8 = 0.125`,
+                    'percentage': `<strong>💯 Advanced Percentage Skills!</strong><br><br><strong>Percentage Increase:</strong><br>Increase £80 by 15%<br>• Find 15%: 80 × 0.15 = 12<br>• Add: 80 + 12 = £92<br>• Or multiply: 80 × 1.15 = £92<br><br><strong>Percentage Decrease:</strong><br>Decrease 120 by 25%<br>• Multiply: 120 × 0.75 = 90<br><br><strong>Reverse Percentages:</strong><br>After 20% off, price is £40. Original?<br>• £40 = 80% of original<br>• Original = 40 ÷ 0.8 = £50`
+                },
+                biology: {
+                    'dna': `<strong>🧬 Deeper into DNA!</strong><br><br><strong>DNA Replication:</strong><br>• DNA unzips down the middle<br>• Each strand acts as a template<br>• New nucleotides pair up (A-T, C-G)<br>• Two identical DNA molecules formed!<br><br><strong>Genes & Proteins:</strong><br>• Genes are "recipes" for proteins<br>• DNA → RNA → Protein<br>• This is called the "Central Dogma"<br><br><strong>Mutations:</strong><br>• Random changes in DNA sequence<br>• Can be harmful, beneficial, or neutral<br>• Source of genetic variation!`,
+                    'gene': `<strong>🧬 Genetics Deep Dive!</strong><br><br><strong>Punnett Squares:</strong><br>Predict offspring traits!<br>• Cross Bb × Bb (brown eyes)<br>• Results: BB, Bb, Bb, bb<br>• 75% brown, 25% blue!<br><br><strong>Co-dominance:</strong><br>Both alleles show (like roan cattle)<br><br><strong>Sex Chromosomes:</strong><br>• XX = Female<br>• XY = Male<br>• Some traits are sex-linked (like colour blindness)`
+                },
+                physics: {
+                    'force': `<strong>💪 Forces in Action!</strong><br><br><strong>Terminal Velocity:</strong><br>• When falling, air resistance increases<br>• Eventually equals weight<br>• Forces balanced = constant speed!<br><br><strong>Newton's 2nd Law Examples:</strong><br>F = m × a<br>• A 1000kg car with 4000N force<br>• a = 4000 ÷ 1000 = 4 m/s²<br><br><strong>Weight vs Mass:</strong><br>• Mass = amount of matter (kg)<br>• Weight = force of gravity (N)<br>• Weight = mass × 10 (on Earth)`,
+                    'electromagnet': `<strong>🧲 Electromagnet Applications!</strong><br><br><strong>Electric Motors:</strong><br>• Electromagnet spins between permanent magnets<br>• Current direction changes to keep spinning<br>• Used in fans, cars, washing machines!<br><br><strong>Loudspeakers:</strong><br>• Electromagnet vibrates with current changes<br>• Attached cone moves air = sound!<br><br><strong>MRI Scanners:</strong><br>• Super-strong superconducting electromagnets<br>• Create detailed body images<br>• Magnets cooled to -269°C!`
+                },
+                chemistry: {
+                    'reactivity': `<strong>⚡ Reactivity in Action!</strong><br><br><strong>Reactions with Water:</strong><br>• Potassium: Catches fire! (purple flame)<br>• Sodium: Fizzes violently, melts into ball<br>• Calcium: Steady bubbling<br>• Magnesium: Very slow reaction<br><br><strong>Reactions with Acid:</strong><br>Metal + Acid → Salt + Hydrogen<br>• Magnesium + HCl → MgCl₂ + H₂<br>• Bubbles = hydrogen gas!<br><br><strong>Extracting Metals:</strong><br>• More reactive than carbon = electrolysis<br>• Less reactive = heating with carbon`,
+                    'polymer': `<strong>🔗 More on Polymers!</strong><br><br><strong>Thermoplastics vs Thermosets:</strong><br><br>Thermoplastics:<br>• Can be melted and remoulded<br>• Chains slide past each other<br>• Examples: polyethene, PVC<br><br>Thermosetting:<br>• Can't be remelted once set<br>• Chains cross-linked permanently<br>• Examples: epoxy resin, Bakelite<br><br><strong>Smart Polymers:</strong><br>• Change with temperature or light<br>• Used in medicine and technology!`
+                },
+                wellbeing: {
+                    'stress': `<strong>🧘 More Stress-Busting Techniques!</strong><br><br><strong>5-4-3-2-1 Grounding:</strong><br>• 5 things you can SEE<br>• 4 things you can TOUCH<br>• 3 things you can HEAR<br>• 2 things you can SMELL<br>• 1 thing you can TASTE<br><br><strong>Progressive Muscle Relaxation:</strong><br>• Tense each muscle group for 5 seconds<br>• Release and feel the difference<br>• Start from toes, work up!<br><br><strong>Journaling:</strong><br>• Write worries before bed<br>• Gets them out of your head<br>• Review weekly for patterns`,
+                    'focus': `<strong>🎯 Advanced Focus Strategies!</strong><br><br><strong>Time Blocking:</strong><br>• Schedule specific times for tasks<br>• Protect these blocks fiercely<br>• Include buffer time between<br><br><strong>The 2-Minute Rule:</strong><br>• If it takes < 2 mins, do it NOW<br>• Prevents small tasks piling up<br><br><strong>Environment Design:</strong><br>• Dedicated study spot<br>• Same place = brain switches to focus mode<br>• Keep it tidy and well-lit`
+                }
+            };
+            
+            const subjectFollowUps = followUps[subject];
+            if (subjectFollowUps && subjectFollowUps[topic]) {
+                return subjectFollowUps[topic];
+            }
+            
+            return `Great question! Let me add to what we discussed about ${topic}. Feel free to ask about any specific part you'd like me to explain further! 🎯`;
+        }
+        
+        // Get contextual response when no keyword matches - try to be helpful!
+        function getContextualResponse(subject, message) {
+            const lowerMsg = message.toLowerCase();
+            
+            // Try to detect what they're actually asking about and give a direct answer
+            const smartResponses = {
+                maths: [
+                    { patterns: ['what is', 'how do', 'how to', 'explain', 'help me', 'can you'], 
+                      response: `<strong>📐 Let me help!</strong><br><br>I'll do my best to answer that. Could you include a specific maths term like "equation", "fraction", "percentage", "angle", or "algebra" so I can give you a detailed explanation? Or just rephrase your question with more detail! 🔢` },
+                    { patterns: ['number', 'calculate', 'work out', 'answer'],
+                      response: `<strong>🔢 Let's calculate!</strong><br><br>I'd love to help you work this out. For step-by-step solutions, try asking about equations, fractions, percentages, or geometry problems. What calculation do you need help with?` }
+                ],
+                english: [
+                    { patterns: ['what is', 'how do', 'how to', 'explain', 'help me', 'can you'],
+                      response: `<strong>📖 I'm on it!</strong><br><br>I want to help with that! For the best answer, mention specific topics like "persuasive writing", "poetry", "Shakespeare", "grammar", or "creative writing". What aspect of English are you working on? ✍️` },
+                    { patterns: ['essay', 'write', 'paragraph', 'sentence'],
+                      response: `<strong>✍️ Writing help!</strong><br><br>I can definitely help with your writing! Are you working on persuasive writing, creative writing, or analysing a text? Let me know and I'll give you specific techniques! 📝` }
+                ],
+                biology: [
+                    { patterns: ['what is', 'how do', 'how does', 'why do', 'explain', 'help me', 'can you', 'tell me'],
+                      response: `<strong>🧬 Great question!</strong><br><br>I want to give you a thorough answer! Try mentioning specific terms like "DNA", "genes", "variation", "extinction", "plant", or "adaptation" and I'll explain in detail. What biological concept are you curious about? 🔬` },
+                    { patterns: ['life', 'living', 'organism', 'cell', 'body'],
+                      response: `<strong>🔬 Let's explore life!</strong><br><br>Biology is all about living things! I can explain DNA & genes (the code of life), variation (why we're all different), extinction (species survival), and plant biology. Which area interests you?` }
+                ],
+                chemistry: [
+                    { patterns: ['what is', 'how do', 'how does', 'why do', 'explain', 'help me', 'can you', 'tell me'],
+                      response: `<strong>⚗️ Chemistry question!</strong><br><br>I'm ready to explain! Mention terms like "ceramic", "polymer", "composite", "reactivity", "displacement", or "energy" for detailed answers. What chemical concept would you like to understand? 🧪` },
+                    { patterns: ['make', 'material', 'substance', 'chemical'],
+                      response: `<strong>🧪 Materials and reactions!</strong><br><br>Chemistry is fascinating! I can explain how materials like ceramics, polymers, and composites are made, or how chemical reactions work including reactivity and energy changes. What interests you?` }
+                ],
+                physics: [
+                    { patterns: ['what is', 'how do', 'how does', 'why do', 'explain', 'help me', 'can you', 'tell me'],
+                      response: `<strong>⚡ Physics question!</strong><br><br>Let me explain! Include terms like "force", "speed", "turning", "field", "static", "current", "resistance", or "electromagnet" for in-depth answers. What physics concept are you studying? 🚀` },
+                    { patterns: ['move', 'motion', 'electric', 'energy', 'power'],
+                      response: `<strong>🚀 Let's do physics!</strong><br><br>Physics explains how everything works! I can cover forces & motion, speed calculations, electricity (static & current), and electromagnets. Which topic shall we dive into?` }
+                ],
+                wellbeing: [
+                    { patterns: ['what is', 'how do', 'how to', 'explain', 'help me', 'can you', 'feel', 'feeling'],
+                      response: `<strong>💚 I hear you!</strong><br><br>I'm here to help with wellbeing. Whether it's stress, focus, confidence, or friendships - I've got tips! What's on your mind? Remember, for serious concerns, always talk to a trusted adult. 💙` },
+                    { patterns: ['sad', 'happy', 'angry', 'scared', 'worried', 'upset'],
+                      response: `<strong>💚 Your feelings matter!</strong><br><br>It's completely okay to feel this way. I can help with managing stress, building confidence, improving focus, or navigating friendships. Would you like some tips? And remember - if things feel really tough, talking to a trusted adult is always a good idea. 💙` }
+                ]
+            };
+            
+            // Check for smart pattern matches
+            const subjectPatterns = smartResponses[subject] || [];
+            for (const item of subjectPatterns) {
+                if (item.patterns.some(p => lowerMsg.includes(p))) {
+                    return item.response;
+                }
+            }
+            
+            // Final fallback - still helpful, not just a menu
+            const fallbacks = {
+                maths: `<strong>📐 I want to help!</strong><br><br>I didn't quite catch the specific maths topic. Try asking about equations, fractions, percentages, Pythagoras, angles, or algebra and I'll give you a detailed explanation! 🔢`,
+                english: `<strong>📖 Let me help!</strong><br><br>I'm not sure which English topic you mean. Ask me about persuasive writing, poetry analysis, Shakespeare, grammar, or creative writing for detailed help! ✍️`,
+                biology: `<strong>🧬 I'm here to help!</strong><br><br>Could you be more specific? I can explain DNA, genes, variation, extinction, plant growth, or adaptations in detail. What would you like to know? 🔬`,
+                chemistry: `<strong>⚗️ Happy to explain!</strong><br><br>Which topic are you asking about? I can cover ceramics, polymers, composites, reactivity, displacement, or energy in reactions. Just mention the topic! 🧪`,
+                physics: `<strong>⚡ Let's figure this out!</strong><br><br>I need a bit more detail. I can explain forces, speed, turning forces, fields, static electricity, current, resistance, or electromagnets. Which one? 🚀`,
+                wellbeing: `<strong>💚 I'm listening!</strong><br><br>I want to help but need a bit more info. Are you dealing with stress, focus issues, confidence, or friendship stuff? I'm here for you! 💙`
+            };
+            
+            return fallbacks[subject] || "I'm here to help! Could you give me a bit more detail about your question? 🚀";
+        }
+
+        // Show about modal
+        function showAbout() {
+            document.getElementById('aboutModal').classList.remove('hidden');
+        }
+
+        // Close about modal
+        function closeAbout() {
+            document.getElementById('aboutModal').classList.add('hidden');
+        }
+
+        // Close about modal when clicking on overlay (outside the modal)
+        function closeAboutOnOverlay(event) {
+            if (event.target.id === 'aboutModal') {
+                closeAbout();
+            }
+        }
+
+        // Show safety info (alias for about)
+        function showSafetyInfo() {
+            showAbout();
+        }
+
+        // Initialize
+        updateQuickPrompts('maths');
+    </script>
+</body>
+</html>
